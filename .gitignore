@@ -1,0 +1,61 @@
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### application ###
+*.yaml
+*.yml
+*.env
+*.properties
+
+### Java 일반 ###
+*.class
+*.jar
+*.war
+*.iml
+*.log
+
+### 로그, 캐시 등 ###
+logs/
+*.tmp
+
+### OS별 불필요 파일 ###
+.DS_Store
+Thumbs.db
+
+### drawio ###
+*.drawio
