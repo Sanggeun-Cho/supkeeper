@@ -4,8 +4,13 @@ import lombok.*;
 
 public class SemesterDto {
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
-    public static class SemesterCreateDto {
+    public static class SemesterCreateReqDto {
         private String semName;
-        private Long userId;
+    }
+
+    @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+    public static class SemesterCreateResDto {
+        private Long semId;
+        private String semName;
     }
 }

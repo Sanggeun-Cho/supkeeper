@@ -25,4 +25,9 @@ public class Semester {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    public Semester(String semName, User user) {
+        this.semName = semName;
+        this.user = user;
+    }
 }
