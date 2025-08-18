@@ -22,7 +22,7 @@ public class SemesterController {
             , description = "새로운 학기를 생성하고 이미 존재하는 이름이면 예외 메세지를 반환합니다.<br>" +
             "Req : userId(Header: 'X-USER-ID'), {semName}<br>" +
             "Res : {semId, semName}")
-    public ResponseEntity<?> createSemsester(
+    public ResponseEntity<?> createSemester(
             @RequestHeader("X-USER-ID") Long userId,
             @RequestBody SemesterDto.SemesterCreateReqDto reqDto
     ) {
@@ -36,5 +36,16 @@ public class SemesterController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(e.getMessage());
         }
+    }
+
+    @DeleteMapping("/{semId}")
+    @Operation(summary = "학기 삭제"
+            , description = "학기를 삭제하며 없는 학기면 예외 메세지를 반환합니다.<br>" +
+            "Req : semId<br>" +
+            "Res : ")
+    public ResponseEntity<?> deleteSemester(@PathVariable Long semId){
+        semesterService.deleteSemester(semId);
+
+        return ResponseEntity.ok().build();
     }
 }
