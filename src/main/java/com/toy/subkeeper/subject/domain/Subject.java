@@ -25,4 +25,10 @@ public class Subject {
     @ManyToOne
     @JoinColumn(name = "sem_id")
     private Semester semester;
+
+
+    public Subject(String subName, Semester semester) {
+        this.subName = subName;
+        this.semester = semester;
+    }
 }

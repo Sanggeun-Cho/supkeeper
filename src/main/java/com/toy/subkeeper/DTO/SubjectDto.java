@@ -4,8 +4,13 @@ import lombok.*;
 
 public class SubjectDto {
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
-    public static class SubjectCreateDto {
+    public static class SubjectCreateReqDto {
         private String subName;
-        private Long semId;
+    }
+
+    @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+    public static class SubjectCreateResDto {
+        private Long subId;
+        private String subName;
     }
 }
