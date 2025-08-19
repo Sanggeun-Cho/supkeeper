@@ -11,6 +11,8 @@ import org.springframework.expression.spel.ast.Assign;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -76,5 +78,50 @@ public class AssignmentService {
         log.info("과제 삭제: (id= {})", assignment.getId());
 
         assignmentRepo.deleteById(assignmentId);
+    }
+
+    // 과제 완료 상태 변경
+    /**
+     * 요청이 1이면 무조건 1 (완료 상태)
+     * 요청이 0이고 마감 24시간 이내면 2 (마감 임박 상태)
+     * 그 외는 0 (미완료 상태)
+     */
+    @Transactional
+    public Assignment updateCompleteState(Long assignmentId, Integer state){
+        Assignment assignment = assignmentRepo.findById(assignmentId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 과제입니다."));
+
+        int defaultState = (state != null && state == 1) ? 1 : 0;
+
+        if(defaultState == 0 && isDueWithin24Hours(assignment.getDueDate())){
+            assignment.setIsComplete(2);
+        } else {
+            assignment.setIsComplete(defaultState);
+        }
+
+        log.info("과제 완료상태 변경: id={}, isComplete={}", assignmentId, assignment.getIsComplete());
+
+        return assignment;
+    }
+
+    private boolean isDueWithin24Hours(Date due){
+        if (due == null) return false;
+
+        long now = System.currentTimeMillis();
+        long diff = due.getTime() - now;
+
+        return diff >= 0 && diff <= 24L * 60 * 60 * 1000;
+    }
+
+    // 자정에 과제 완료 상태 리프레시를 위한 함수
+    @Transactional
+    public int refreshZeroToTwoForDueSoon() {
+        Date now = new Date();
+        Date in24th = new Date(now.getTime() + 24L * 60 * 60 * 1000);
+        int updated = assignmentRepo.markDueSoonZeroToTwo(now, in24th);
+
+        if(updated > 0) log.info("임박 과제 일괄 갱신: {}건", updated);
+
+        return updated;
     }
 }

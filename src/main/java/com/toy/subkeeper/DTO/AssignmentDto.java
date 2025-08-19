@@ -66,4 +66,23 @@ public class AssignmentDto {
         } // subName 을 꺼내기 위함
     }
 
+    @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+    public static class AssignmentStateUpdateReqDto{
+        private int isComplete;
+    }
+
+    @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+    public static class AssignmentStateUpdateResDto {
+        private Long assignId;
+        private int isComplete;
+        private Date dueDate;
+
+        public static AssignmentStateUpdateResDto from(Assignment assignment){
+            return AssignmentStateUpdateResDto.builder()
+                    .assignId(assignment.getId())
+                    .isComplete(assignment.getIsComplete())
+                    .dueDate(assignment.getDueDate())
+                    .build();
+        }
+    }
 }

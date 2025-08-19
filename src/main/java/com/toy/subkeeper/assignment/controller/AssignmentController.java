@@ -49,4 +49,17 @@ public class AssignmentController {
 
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("/{assignId}/complete")
+    @Operation(summary = "과제 완료 상태 변경"
+            , description = "버튼을 누를 시 과제 완료에 대한 상태가 변경되며 마감일이 하루 남은 과제는 2로 표현됩니다.<br>" +
+            "Req : assignId, {isComplete}<br>" +
+            "Res : <assignId, isComplete, dueDate}")
+    public ResponseEntity<?> changeComplete(
+            @PathVariable Long assignId,
+            @RequestBody AssignmentDto.AssignmentStateUpdateReqDto reqDto) {
+        Assignment updatedAssign = assignmentService.updateCompleteState(assignId, reqDto.getIsComplete());
+
+        return ResponseEntity.ok(AssignmentDto.AssignmentStateUpdateResDto.from(updatedAssign));
+    }
 }
