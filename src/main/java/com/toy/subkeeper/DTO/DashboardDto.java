@@ -32,4 +32,29 @@ public class DashboardDto {
             private int isComplete;
         }
     }
+
+    @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+    public class DashboardViewDto {
+        private DashboardDtoBuilder dashboard;
+        private List<SemesterMenuItemDto> semesters;
+        private AssignmentSections sections;
+
+        @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+        public class SemesterMenuItemDto {
+            private Long semId;
+            private String semName;
+
+            private boolean current; // 현재 선택된 학기인가
+        }
+
+        @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+        public class AssignmentSections {
+            private List<DashboardDtoBuilder.AssignmentListDto> incomplete;
+            private List<DashboardDtoBuilder.AssignmentListDto> complete;
+        }
+    }
+
+
+
+
 }

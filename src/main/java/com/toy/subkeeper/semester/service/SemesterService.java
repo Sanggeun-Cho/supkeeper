@@ -1,15 +1,23 @@
 package com.toy.subkeeper.semester.service;
 
+import com.toy.subkeeper.DTO.DashboardDto;
 import com.toy.subkeeper.DTO.SemesterDto;
+import com.toy.subkeeper.assignment.domain.Assignment;
+import com.toy.subkeeper.assignment.repo.AssignmentRepo;
 import com.toy.subkeeper.exception.DuplicateSemNameException;
 import com.toy.subkeeper.semester.domain.Semester;
 import com.toy.subkeeper.semester.repo.SemesterRepo;
+import com.toy.subkeeper.subject.domain.Subject;
+import com.toy.subkeeper.subject.repo.SubjectRepo;
 import com.toy.subkeeper.user.domain.User;
 import com.toy.subkeeper.user.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -18,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class SemesterService {
     private final SemesterRepo semesterRepo;
     private final UserRepo userRepo;
+    private final SubjectRepo subjectRepo;
+    private final AssignmentRepo assignmentRepo;
 
     // 학기 생성
     public Semester createSemester(Long userId, SemesterDto.SemesterCreateReqDto semCreateReqDto) {
@@ -55,5 +65,106 @@ public class SemesterService {
         log.info("학기 삭제: (id= {})", semester.getId());
 
         semesterRepo.delete(semester);
+    }
+
+    // 대시보드 이동
+    @Transactional(readOnly = true)
+    public DashboardDto.DashboardViewDto getDashboardView(Long userId, Long semIdNullable) {
+        // 유저의 모든 학기 조회
+        List<Semester> allSemesters = semesterRepo.findByUser_IdOrderByIdDesc(userId);
+        if(allSemesters.isEmpty()) {
+            throw new IllegalArgumentException("해당 사용자의 학기가 없습니다.");
+        }
+
+        // 사용할 semId 결정 (기본은 가장 최신 학기)
+        Long semId = (semIdNullable != null)
+                ? semIdNullable
+                : semesterRepo.findTopByUser_IdOrderByIdDesc(userId)
+                .orElseThrow(() -> new IllegalArgumentException("최신 학기를 찾을 수 없습니다."))
+                .getId();
+
+        // 사이드 제외 대시보드
+        DashboardDto.DashboardDtoBuilder dashboard = buildDashboard(semId);
+
+        // 사이드 바
+        List<DashboardDto.DashboardViewDto.SemesterMenuItemDto> menu = allSemesters.stream()
+                .map(s -> DashboardDto.DashboardViewDto.SemesterMenuItemDto.builder()
+                        .semId(s.getId())
+                        .semName(s.getSemName())
+                        .current(s.getId().equals(semId))
+                        .build())
+                .toList();
+
+        // 과제 칸, 모두 최신순으로 정렬
+        List<DashboardDto.DashboardDtoBuilder.AssignmentListDto> incompleteDtos =
+                assignmentRepo.findBySubject_Semester_IdAndIsCompleteInOrderByIdDesc(
+                        semId, List.of(0, 2)
+                ).stream()
+                        .map(this::toAssignmentDto)
+                        .toList();
+
+        List<DashboardDto.DashboardDtoBuilder.AssignmentListDto> completeDtos =
+                assignmentRepo.findBySubject_Semester_IdAndIsCompleteInOrderByIdDesc(
+                        semId, 1
+                ).stream()
+                        .map(this::toAssignmentDto)
+                        .toList();
+
+        DashboardDto.DashboardViewDto.AssignmentSections sections = DashboardDto.DashboardViewDto.AssignmentSections.builder()
+                .incomplete(incompleteDtos)
+                .complete(completeDtos)
+                .build();
+
+        return DashboardDto.DashboardViewDto.builder()
+                .dashboard(dashboard)
+                .semesters(menu)
+                .sections(sections)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public DashboardDto.DashboardDtoBuilder buildDashboard(Long semId) {
+        // 학기와 사용자 관계
+        Semester sem = semesterRepo.findByIdWithUser(semId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 학기입니다."));
+
+        // 과목 리스트 가져오기
+        List<Subject> subjects = subjectRepo.findBySemester_Id(semId);
+
+        // 전체 과제를 ID 기준 최신순 정렬로 가져오기
+        List<Assignment> assignments = assignmentRepo.findAllBySemesterIdOrderByIdDesc(semId);
+
+        // 과목
+        List<DashboardDto.DashboardDtoBuilder.SubjectListDto> subjectList = subjects.stream()
+                .map(s -> DashboardDto.DashboardDtoBuilder.SubjectListDto.builder()
+                        .subId(s.getId())
+                        .subName(s.getSubName())
+                        .build())
+                .toList();
+
+        // 과제
+        List<DashboardDto.DashboardDtoBuilder.AssignmentListDto> assignmentList = assignments.stream()
+                .map(this::toAssignmentDto)
+                .toList();
+
+        return DashboardDto.DashboardDtoBuilder.builder()
+                .userId(sem.getUser().getId())
+                .userName(sem.getUser().getUserName())
+                .semId(sem.getId())
+                .semName(sem.getSemName())
+                .subjectList(subjectList)
+                .assignmentList(assignmentList)
+                .build();
+    }
+
+    // 과제 DTO에 대한 Mapping Helper
+    private DashboardDto.DashboardDtoBuilder.AssignmentListDto toAssignmentDto(Assignment assignment) {
+        return DashboardDto.DashboardDtoBuilder.AssignmentListDto.builder()
+                .assignId(assignment.getId())
+                .assignName(assignment.getAssignName())
+                .dueDate(assignment.getDueDate())
+                .category(assignment.getCategory())
+                .isComplete(assignment.getIsComplete())
+                .build();
     }
 }

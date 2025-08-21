@@ -1,5 +1,6 @@
 package com.toy.subkeeper.semester.controller;
 
+import com.toy.subkeeper.DTO.DashboardDto;
 import com.toy.subkeeper.DTO.SemesterDto;
 import com.toy.subkeeper.exception.DuplicateSemNameException;
 import com.toy.subkeeper.semester.domain.Semester;
@@ -47,5 +48,19 @@ public class SemesterController {
         semesterService.deleteSemester(semId);
 
         return ResponseEntity.ok().build();
+    }
+
+    // 대시보드 조회
+    @GetMapping("/{semId}/dashboard")
+    @Operation(summary = "대시보드 조회"
+            , description = "대시보드에 대한 모든 정보를 넘깁니다.<br>" +
+            "Req : userId(Header: 'X-USER-ID'), {semId}" +
+            "Res : Dto 참조")
+    public ResponseEntity<?> getDashboardView(
+            @RequestHeader("X-USER-ID") Long userId,
+            @PathVariable Long semId
+    ) {
+        DashboardDto.DashboardViewDto res = semesterService.getDashboardView(userId, semId);
+        return ResponseEntity.ok(res);
     }
 }
