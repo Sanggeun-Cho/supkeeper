@@ -7,22 +7,16 @@ import java.util.List;
 
 public class CalendarDto {
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
-    public static class CalendarListDto {
-        private Long userName;
-        private List<SubjectListDto> subjectList;
-        private List<AssignmentListDto> assignmentList;
-    }
-
-    @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
-    public static class SubjectListDto {
+    public static class CalendarItem {
         private String subName;
+        private Date dueDate;
+        private String assignName;
+        private int category;
     }
 
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
-    public static class AssignmentListDto {
-        private String assignName;
-        private Date dueDate;
-        private Long subId;
-        private int category;
+    public static class CalendarItemList {
+        private String userName;
+        private List<CalendarItem> items;
     }
 }

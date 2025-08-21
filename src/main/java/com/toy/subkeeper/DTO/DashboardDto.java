@@ -30,6 +30,9 @@ public class DashboardDto {
             private Date dueDate;
             private int category;
             private int isComplete;
+
+            // 화면에 표시할 날짜
+            private String dueLabel;
         }
     }
 

@@ -1,5 +1,6 @@
 package com.toy.subkeeper.semester.service;
 
+import com.toy.subkeeper.DTO.CalendarDto;
 import com.toy.subkeeper.DTO.DashboardDto;
 import com.toy.subkeeper.DTO.SemesterDto;
 import com.toy.subkeeper.assignment.domain.Assignment;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -122,6 +124,32 @@ public class SemesterService {
                 .build();
     }
 
+    // 달력
+    @Transactional(readOnly = true)
+    public CalendarDto.CalendarItemList getCalendarItems(Long semId) {
+        // 학기 사용자 관계
+        Semester sem = semesterRepo.findByIdWithUser(semId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 학기입니다."));
+
+        // 과제를 마감일 순으로 정렬
+        List<Assignment> assignments = assignmentRepo.findAllBySemesterIdOrderByDueDate(semId);
+
+        // 객체 만들기
+        List<CalendarDto.CalendarItem> items = assignments.stream()
+                .map(a -> CalendarDto.CalendarItem.builder()
+                        .subName(a.getSubject().getSubName())
+                        .dueDate(a.getDueDate())
+                        .assignName(a.getAssignName())
+                        .category(a.getCategory())
+                        .build())
+                .toList();
+
+        return CalendarDto.CalendarItemList.builder()
+                .userName(sem.getUser().getUserName())
+                .items(items)
+                .build();
+    }
+
     @Transactional(readOnly = true)
     public DashboardDto.DashboardDtoBuilder buildDashboard(Long semId) {
         // 학기와 사용자 관계
@@ -131,8 +159,8 @@ public class SemesterService {
         // 과목 리스트 가져오기
         List<Subject> subjects = subjectRepo.findBySemester_Id(semId);
 
-        // 전체 과제를 ID 기준 최신순 정렬로 가져오기
-        List<Assignment> assignments = assignmentRepo.findAllBySemesterIdOrderByIdDesc(semId);
+        // 전체 과제를 마감기한 기준 최신순 정렬로 가져오기
+        List<Assignment> assignments = assignmentRepo.findAllBySemesterIdOrderByDueDateDesc(semId);
 
         // 과목
         List<DashboardDto.DashboardDtoBuilder.SubjectListDto> subjectList = subjects.stream()
@@ -165,6 +193,35 @@ public class SemesterService {
                 .dueDate(assignment.getDueDate())
                 .category(assignment.getCategory())
                 .isComplete(assignment.getIsComplete())
+                .dueLabel(formatDueLabelKST(assignment.getDueDate()))
                 .build();
+    }
+
+    // Chat GPT 로직
+    // 해당 날짜를 'AUG 21st' 등으로 표기하여 그대로 넘겨줌
+    private String formatDueLabelKST(Date dueDate) {
+        if (dueDate == null) return null;
+        var zone = java.time.ZoneId.of("Asia/Seoul");
+        var zdt  = java.time.Instant.ofEpochMilli(dueDate.getTime()).atZone(zone);
+
+        int day = zdt.getDayOfMonth();
+        String suffix = ordinalSuffix(day); // st/nd/rd/th
+        // "AUG" 같은 영문 약어 대문자
+        String mon = zdt.getMonth()
+                .getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.ENGLISH)
+                .toUpperCase();
+
+        return mon + " " + day + suffix; // 예: "AUG 21st"
+    }
+
+    private String ordinalSuffix(int day) {
+        // 11,12,13은 예외적으로 th
+        if (day >= 11 && day <= 13) return "th";
+        return switch (day % 10) {
+            case 1 -> "st";
+            case 2 -> "nd";
+            case 3 -> "rd";
+            default -> "th";
+        };
     }
 }

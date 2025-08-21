@@ -54,7 +54,7 @@ public class SemesterController {
     @GetMapping("/{semId}/dashboard")
     @Operation(summary = "대시보드 조회"
             , description = "대시보드에 대한 모든 정보를 넘깁니다.<br>" +
-            "Req : userId(Header: 'X-USER-ID'), {semId}" +
+            "Req : userId(Header: 'X-USER-ID'), semId" +
             "Res : Dto 참조")
     public ResponseEntity<?> getDashboardView(
             @RequestHeader("X-USER-ID") Long userId,
@@ -62,5 +62,15 @@ public class SemesterController {
     ) {
         DashboardDto.DashboardViewDto res = semesterService.getDashboardView(userId, semId);
         return ResponseEntity.ok(res);
+    }
+
+    // 달력 조회
+    @GetMapping("/{semId}/calendar")
+    @Operation(summary = "달력 조회"
+            , description = "학기에 해당하는 달력에 대한 모든 정보를 넘깁니다.<br>" +
+            "Res : semId<br>" +
+            "Req : {userName, <List>{subName, dueDate, assignName, category}}")
+    public ResponseEntity<?> getCalendarItes(@PathVariable Long semId){
+        return ResponseEntity.ok(semesterService.getCalendarItems(semId));
     }
 }
