@@ -16,14 +16,15 @@ public class Semester {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false, length = 50)
     private String semName;
 
     // 과목과 one to many 관계, 학기가 삭제되면 과목들도 모두 지워짐
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subject> subjectList = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     public Semester(String semName, User user) {
