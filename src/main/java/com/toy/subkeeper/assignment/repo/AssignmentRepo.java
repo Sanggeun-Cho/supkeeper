@@ -33,11 +33,11 @@ public interface AssignmentRepo extends CrudRepository<Assignment, Long> {
     List<Assignment> findAllBySemesterIdOrderByDueDateDesc(@Param("semId") Long semId);
 
     // 미완료 과제 최신순 정렬 (0, 2)
-    List<Assignment> findBySubject_Semester_IdAndIsCompleteInOrderByIdDesc(
+    List<Assignment> findBySubject_Semester_IdAndIsCompleteInOrderByDueDateDesc(
             Long semId, Collection<Integer> isComplete);
 
     // 완료 과제 최신순 정렬 (1)
-    List<Assignment> findBySubject_Semester_IdAndIsCompleteInOrderByIdDesc(
+    List<Assignment> findBySubject_Semester_IdAndIsCompleteOrderByDueDateDesc(
             Long semId, int isComplete);
 
     // 학기에 해당하는 모든 과제

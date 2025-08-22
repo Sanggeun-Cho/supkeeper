@@ -99,14 +99,14 @@ public class SemesterService {
 
         // 과제 칸, 모두 최신순으로 정렬
         List<DashboardDto.DashboardDtoBuilder.AssignmentListDto> incompleteDtos =
-                assignmentRepo.findBySubject_Semester_IdAndIsCompleteInOrderByIdDesc(
+                assignmentRepo.findBySubject_Semester_IdAndIsCompleteInOrderByDueDateDesc(
                         semId, List.of(0, 2)
                 ).stream()
                         .map(this::toAssignmentDto)
                         .toList();
 
         List<DashboardDto.DashboardDtoBuilder.AssignmentListDto> completeDtos =
-                assignmentRepo.findBySubject_Semester_IdAndIsCompleteInOrderByIdDesc(
+                assignmentRepo.findBySubject_Semester_IdAndIsCompleteOrderByDueDateDesc(
                         semId, 1
                 ).stream()
                         .map(this::toAssignmentDto)

@@ -21,7 +21,7 @@ public class Subject {
 
     // 과제와 one to many 관계, 과목이 삭제되면 과제들도 모두 지워짐
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Assignment> assginmentList = new ArrayList<>();
+    private List<Assignment> assignmentList = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "sem_id", nullable = false)

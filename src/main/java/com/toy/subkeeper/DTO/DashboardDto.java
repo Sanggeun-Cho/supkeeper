@@ -37,13 +37,13 @@ public class DashboardDto {
     }
 
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
-    public class DashboardViewDto {
+    public static class DashboardViewDto {
         private DashboardDtoBuilder dashboard;
         private List<SemesterMenuItemDto> semesters;
         private AssignmentSections sections;
 
         @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
-        public class SemesterMenuItemDto {
+        public static class SemesterMenuItemDto {
             private Long semId;
             private String semName;
 
@@ -51,7 +51,7 @@ public class DashboardDto {
         }
 
         @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
-        public class AssignmentSections {
+        public static class AssignmentSections {
             private List<DashboardDtoBuilder.AssignmentListDto> incomplete;
             private List<DashboardDtoBuilder.AssignmentListDto> complete;
         }

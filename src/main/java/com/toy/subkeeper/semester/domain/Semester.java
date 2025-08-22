@@ -20,7 +20,7 @@ public class Semester {
     private String semName;
 
     // 과목과 one to many 관계, 학기가 삭제되면 과목들도 모두 지워짐
-    @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "semester", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subject> subjectList = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

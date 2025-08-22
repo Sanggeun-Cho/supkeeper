@@ -54,7 +54,7 @@ public class SemesterController {
     @GetMapping("/{semId}/dashboard")
     @Operation(summary = "대시보드 조회"
             , description = "대시보드에 대한 모든 정보를 넘깁니다.<br>" +
-            "Req : userId(Header: 'X-USER-ID'), semId" +
+            "Req : userId(Header: 'X-USER-ID'), semId<br>" +
             "Res : Dto 참조")
     public ResponseEntity<?> getDashboardView(
             @RequestHeader("X-USER-ID") Long userId,
