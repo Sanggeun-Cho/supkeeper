@@ -24,7 +24,7 @@ public class UserController {
             description = "사용자의 이름을 받아 새로운 사용자인 경우 새로 생성, 존재하는 사용자인 경우 해당 사용자의 ID를 반환합니다.<br>" +
                     "Req : {userName}<br>" +
                     "Res : {userId, userName}")
-    public ResponseEntity<?> createUser(@RequestBody UserDto.UserCreateReqDto reqDto){
+    public ResponseEntity<UserDto.UserCreateResDto> createUser(@RequestBody UserDto.UserCreateReqDto reqDto){
         User savedUser = userService.createUser(reqDto);
         UserDto.UserCreateResDto userDto = new UserDto.UserCreateResDto(savedUser.getId(), savedUser.getUserName());
 
