@@ -15,7 +15,6 @@ public class DashboardDto {
         private String semName;
 
         private List<SubjectListDto> subjectList;
-        private List<AssignmentListDto> assignmentList;
 
         @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
         public static class SubjectListDto{

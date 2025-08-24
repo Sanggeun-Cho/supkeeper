@@ -98,19 +98,17 @@ public class SemesterService {
                 .toList();
 
         // 과제 칸, 모두 최신순으로 정렬
-        List<DashboardDto.DashboardDtoBuilder.AssignmentListDto> incompleteDtos =
-                assignmentRepo.findBySubject_Semester_IdAndIsCompleteInOrderByDueDateDesc(
-                        semId, List.of(0, 2)
-                ).stream()
-                        .map(this::toAssignmentDto)
-                        .toList();
+        List<Assignment> all = assignmentRepo.findAllBySemesterIdOrderByDueDateDesc(semId);
 
-        List<DashboardDto.DashboardDtoBuilder.AssignmentListDto> completeDtos =
-                assignmentRepo.findBySubject_Semester_IdAndIsCompleteOrderByDueDateDesc(
-                        semId, 1
-                ).stream()
-                        .map(this::toAssignmentDto)
-                        .toList();
+        List<DashboardDto.DashboardDtoBuilder.AssignmentListDto> incompleteDtos = all.stream()
+                .filter(a -> a.getIsComplete() != 1)     // 0: 미완료, 2: 하루 남은 과제
+                .map(this::toAssignmentDto)
+                .toList();
+
+        List<DashboardDto.DashboardDtoBuilder.AssignmentListDto> completeDtos = all.stream()
+                .filter(a -> a.getIsComplete() == 1)     // 1: 완료
+                .map(this::toAssignmentDto)
+                .toList();
 
         DashboardDto.DashboardViewDto.AssignmentSections sections = DashboardDto.DashboardViewDto.AssignmentSections.builder()
                 .incomplete(incompleteDtos)
@@ -159,9 +157,6 @@ public class SemesterService {
         // 과목 리스트 가져오기
         List<Subject> subjects = subjectRepo.findBySemester_Id(semId);
 
-        // 전체 과제를 마감기한 기준 최신순 정렬로 가져오기
-        List<Assignment> assignments = assignmentRepo.findAllBySemesterIdOrderByDueDateDesc(semId);
-
         // 과목
         List<DashboardDto.DashboardDtoBuilder.SubjectListDto> subjectList = subjects.stream()
                 .map(s -> DashboardDto.DashboardDtoBuilder.SubjectListDto.builder()
@@ -170,18 +165,12 @@ public class SemesterService {
                         .build())
                 .toList();
 
-        // 과제
-        List<DashboardDto.DashboardDtoBuilder.AssignmentListDto> assignmentList = assignments.stream()
-                .map(this::toAssignmentDto)
-                .toList();
-
         return DashboardDto.DashboardDtoBuilder.builder()
                 .userId(sem.getUser().getId())
                 .userName(sem.getUser().getUserName())
                 .semId(sem.getId())
                 .semName(sem.getSemName())
                 .subjectList(subjectList)
-                .assignmentList(assignmentList)
                 .build();
     }
 
