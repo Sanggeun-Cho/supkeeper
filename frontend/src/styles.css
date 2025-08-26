@@ -1,0 +1,149 @@
+:root{
+    /* 색상 토큰 */
+    --blue:#6A92F2;         /* 상단바 */
+    --bg:#F3F7FF;           /* 전체 배경 */
+    --panel:#FFFFFF;        /* 카드/패널 */
+    --ink:#111111;          /* 모든 본문 텍스트(검은색 통일) */
+    --ok:#12B886;           /* 확인/완료 */
+    --danger:#EF5350;       /* 삭제/경고 */
+    --logout:#2E3A59;        /* 로그아웃/진한 버튼 */
+    --logout-hover:#1F2942;  /* 로그아웃 hover */
+}
+
+*{ box-sizing:border-box; }
+html,body,#root{ height:100%; overflow:hidden; }
+body{
+    font-family: ui-sans-serif,system-ui,-apple-system,"Pretendard",Segoe UI,Roboto,"Noto Sans KR";
+    color:var(--ink);                 /* ★ 헤더바 제외 모든 글자 검은색 */
+    background:var(--bg);
+    overflow-x:hidden;
+}
+
+/* 상단바 */
+.topbar{
+    position:fixed; left:0; right:0; top:0; height:68px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--blue); color:#fff; font-weight:800;
+}
+.brandText{
+    position:absolute; left:50%; transform:translateX(-50%);
+    font-weight:900; font-size:24px; letter-spacing:1.2px;
+    color:#fff; text-shadow:0 1px 0 rgba(0,0,0,.06);
+}
+.brandLogo{
+    position:absolute; left:50%; transform:translateX(-50%);
+    height: 48px;                                        /* 원하면 24~32px로 조절 */
+}
+.hello{
+    position:absolute; right:24px; font-weight:700; display:flex; align-items:center; gap:8px;
+    color:#fff; /* 헤더바 안의 인사말만 흰색 */
+}
+
+/* 레이아웃 */
+.app{ min-height:100vh; width:100vw; background:var(--bg); }
+.shell{
+    margin-top:68px; background:var(--bg);
+    border-radius:0; min-height:calc(100vh - 68px);
+    display:grid; grid-template-columns:260px minmax(0,1fr); width:100%;
+}
+.side{
+    background:#E9ECF7; border-right:1px solid #e5e7eb;
+    padding:24px; border-radius:0;
+}
+.main{ padding:24px 32px; }
+@media (min-width:1280px){ .main{ max-width:1100px; margin:0 auto; } }
+@media (max-width:960px){ .shell{ grid-template-columns:220px minmax(0,1fr);} }
+@media (max-width:720px){
+    .shell{ grid-template-columns:1fr; }
+    .side{ border-right:none; border-bottom:1px solid #e5e7eb; }
+}
+
+/* 타이포(전부 검은색) */
+.h1{ font-size:28px; font-weight:900; color:var(--ink); margin:0 0 12px; }
+.h2{ font-size:22px; font-weight:800; color:var(--ink); margin:0; }
+.muted{ color:var(--ink); opacity:.72; font-size:14px; } /* 톤만 살짝 낮춤 */
+
+/* 버튼 */
+.btn{ padding:8px 12px; border-radius:8px; border:1px solid #d1d5db; background:#fff; cursor:pointer; }
+.btn.ok{ background:var(--ok); color:#fff; border-color:var(--ok); }
+.btn.danger{ background:#fff; color:#d32f2f; border-color:#f5bdbd; }
+.btn.ghost{ background:transparent; border:none; color:var(--ink); opacity:.7; }
+.btn.logout{
+    background: var(--logout);
+    border-color: var(--logout);
+    color: #fff !important;
+    font-weight: 800;
+}
+.btn.logout:hover{
+    background: var(--logout-hover);
+    border-color: var(--logout-hover);
+}  /* ★ hover */
+
+/* 학기 리스트 */
+.semList{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+.semItem{ display:flex; justify-content:space-between; align-items:center; background:#fff; padding:10px 12px; border-radius:8px; }
+
+/* 카드 */
+.taskBadge{
+    width:56px; height:56px; border-radius:50%;
+    background:#6A92F2; color:#fff; font-weight:900;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+}
+.taskTitle{ font-size:20px; font-weight:900; }
+.taskCard{
+    border:1.5px solid #111; border-radius:12px;
+    padding:16px 18px; display:flex; align-items:center; justify-content:space-between; background:#fff;
+}
+.doneCard{
+    background:#ddd; border-radius:12px;
+    padding:16px 18px; display:flex; align-items:center; justify-content:space-between;
+}
+.actions{ display:flex; gap:8px; }
+
+/* 모달(팝업) — 세련된 스타일 */
+.overlay{ position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; }
+.modal{
+    background:#fff; width:520px; max-width:92vw; border-radius:14px; padding:22px 22px 18px;
+    box-shadow:0 28px 60px rgba(0,0,0,.22);
+}
+.modal .btn { color: var(--ink) !important; }
+.modalHeader{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.modalHeader .btn { color: var(--ink) !important; }
+.modalTitle{ font-size:18px; font-weight:800; color:var(--ink); }
+.modalBody{ display:flex; flex-direction:column; gap:12px; }
+.field{ display:flex; flex-direction:column; gap:6px; }
+.label{ font-size:13px; font-weight:700; color:var(--ink); }
+.input{ padding:12px 14px; border-radius:10px; border:1px solid #cfd5de; background:#fff; color:var(--ink); }
+.modalActions{ display:flex; justify-content:flex-end; gap:8px; margin-top:6px; }
+
+/* 로그인 */
+.login-full{ min-height:100vh; width:100vw; display:grid; place-items:center; background:var(--bg); }
+.login-panel{
+    width:480px; max-width:92vw; background:#fff; border:1px solid #e6eaf2;
+    border-radius:16px; padding:28px 28px 24px;
+    box-shadow:0 24px 48px rgba(16,24,40,.14), 0 2px 8px rgba(16,24,40,.08);
+    display:flex; flex-direction:column; gap:16px; align-items:center;
+}
+.logoRing{ width:96px; height:96px; border-radius:50%; background:#6A92F2; display:grid; place-items:center; box-shadow:0 6px 16px rgba(0,0,0,.12); }
+.logoRing img{ width:64px; height:64px; }
+.loginTitleCenter{ text-align:center; font-size:22px; font-weight:800; color:var(--ink); }
+.inputLarge{
+    width:100%; max-width:360px; display:block; margin:0 auto;
+    padding:14px 16px; border-radius:12px; border:1.5px solid #cbd5e1;
+    background:#fff !important; color:#111 !important; caret-color:#111; font-size:16px;
+}
+.inputLarge::placeholder{ color:#9ca3af; opacity:1; }
+.inputLarge:-webkit-autofill,
+.inputLarge:-webkit-autofill:hover,
+.inputLarge:-webkit-autofill:focus{
+    -webkit-text-fill-color:#111 !important;
+    transition:background-color 5000s ease-in-out 0s;
+    box-shadow:0 0 0px 1000px #fff inset !important;
+}
+.loginBigBtn{
+    width:100%; max-width:360px; display:block; margin:0 auto;
+    padding:14px 16px; border-radius:12px;
+    border:1px solid var(--ok); background:var(--ok); color:#fff; font-weight:800; font-size:16px;
+}
+.loginHelp{ color:var(--ink); opacity:.72; text-align:center; font-size:14px; }
+.topbar.login-hidden{ display:none; }

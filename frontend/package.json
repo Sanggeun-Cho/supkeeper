@@ -1,13 +1,14 @@
 {
-  "name": "frontend",
+  "name": "2359-frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:copy": "vite build && rm -rf ../src/main/resources/static/* && cp -R dist/* ../src/main/resources/static/"
   },
   "dependencies": {
     "react": "^19.1.1",
