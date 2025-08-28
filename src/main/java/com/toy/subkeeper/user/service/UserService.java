@@ -1,6 +1,7 @@
 package com.toy.subkeeper.user.service;
 
 import com.toy.subkeeper.DTO.UserDto;
+import com.toy.subkeeper.semester.repo.SemesterRepo;
 import com.toy.subkeeper.user.domain.User;
 import com.toy.subkeeper.user.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.Optional;
 
 public class UserService {
     private final UserRepo userRepo;
+    private final SemesterRepo semesterRepo;
 
     // 사용자의 이름을 받아 사용자를 생성
     public User createUser(UserDto.UserCreateReqDto userCreateReqDto){
@@ -34,5 +36,11 @@ public class UserService {
         log.info("유저 생성: {} (id= {})", user.getUserName(), user.getId());
 
         return savedUser;
+    }
+
+    public Long findLastSemId(Long userId){
+        return semesterRepo.findTopByUser_IdOrderByIdDesc(userId)
+                .map(s -> s.getId())
+                .orElse(null);
     }
 }

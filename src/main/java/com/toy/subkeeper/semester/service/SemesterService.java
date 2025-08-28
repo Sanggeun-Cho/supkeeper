@@ -98,7 +98,7 @@ public class SemesterService {
                 .toList();
 
         // 과제 칸, 모두 최신순으로 정렬
-        List<Assignment> all = assignmentRepo.findAllBySemesterIdOrderByDueDateDesc(semId);
+        List<Assignment> all = assignmentRepo.findAllBySemesterIdOrderByDueDateAsc(semId);
 
         List<DashboardDto.DashboardDtoBuilder.AssignmentListDto> incompleteDtos = all.stream()
                 .filter(a -> a.getIsComplete() != 1)     // 0: 미완료, 2: 하루 남은 과제

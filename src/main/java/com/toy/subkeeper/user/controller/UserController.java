@@ -26,7 +26,9 @@ public class UserController {
                     "Res : {userId, userName}")
     public ResponseEntity<UserDto.UserCreateResDto> createUser(@RequestBody UserDto.UserCreateReqDto reqDto){
         User savedUser = userService.createUser(reqDto);
-        UserDto.UserCreateResDto userDto = new UserDto.UserCreateResDto(savedUser.getId(), savedUser.getUserName());
+        Long lastSemId = userService.findLastSemId(savedUser.getId());
+
+        UserDto.UserCreateResDto userDto = new UserDto.UserCreateResDto(savedUser.getId(), savedUser.getUserName(), lastSemId);
 
         return ResponseEntity.ok(userDto);
     }

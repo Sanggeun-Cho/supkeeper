@@ -16,5 +16,6 @@ public class UserDto {
     public static class UserCreateResDto {
         private Long userId;
         private String userName;
+        private Long lastSemId;
     }
 }

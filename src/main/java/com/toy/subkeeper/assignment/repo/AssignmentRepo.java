@@ -28,17 +28,9 @@ public interface AssignmentRepo extends CrudRepository<Assignment, Long> {
               JOIN a.subject sub
               JOIN sub.semester sem
              WHERE sem.id = :semId
-             ORDER BY a.dueDate DESC
+             ORDER BY a.dueDate ASC
              """)
-    List<Assignment> findAllBySemesterIdOrderByDueDateDesc(@Param("semId") Long semId);
-
-    // 미완료 과제 최신순 정렬 (0, 2)
-    List<Assignment> findBySubject_Semester_IdAndIsCompleteInOrderByDueDateDesc(
-            Long semId, Collection<Integer> isComplete);
-
-    // 완료 과제 최신순 정렬 (1)
-    List<Assignment> findBySubject_Semester_IdAndIsCompleteOrderByDueDateDesc(
-            Long semId, int isComplete);
+    List<Assignment> findAllBySemesterIdOrderByDueDateAsc(@Param("semId") Long semId);
 
     // 학기에 해당하는 모든 과제
     @Query("""
@@ -50,4 +42,6 @@ public interface AssignmentRepo extends CrudRepository<Assignment, Long> {
             order by a.dueDate asc, a.id asc
            """)
     List<Assignment> findAllBySemesterIdOrderByDueDate(@Param("semId") Long semId);
+
+    List<Assignment> findAllByIsComplete(Integer isComplete);
 }
