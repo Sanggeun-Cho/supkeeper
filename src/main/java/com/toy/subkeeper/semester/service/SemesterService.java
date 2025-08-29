@@ -183,6 +183,7 @@ public class SemesterService {
                 .category(assignment.getCategory())
                 .isComplete(assignment.getIsComplete())
                 .dueLabel(formatDueLabelKST(assignment.getDueDate()))
+                .subId(assignment.getSubject().getId())
                 .build();
     }
 
