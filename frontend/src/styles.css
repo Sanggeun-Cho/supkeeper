@@ -1,122 +1,188 @@
 :root{
-    /* 색상 토큰 */
-    --blue:#6A92F2;         /* 상단바 */
-    --bg:#F3F7FF;           /* 전체 배경 */
-    --panel:#FFFFFF;        /* 카드/패널 */
-    --ink:#111111;          /* 모든 본문 텍스트(검은색 통일) */
-    --ok:#12B886;           /* 확인/완료 */
-    --danger:#EF5350;       /* 삭제/경고 */
-    --logout:#2E3A59;        /* 로그아웃/진한 버튼 */
-    --logout-hover:#1F2942;  /* 로그아웃 hover */
+    --blue:#6A92F2;
+    --bg:#F3F7FF;
+    --ink:#111111;
+    --ok:#12B886;
+    --logout:#2E3A59;
+    --logout-hover:#1F2942;
+
+    --btn-red:#E49797;
+    --btn-blue:#8FB1D9;
+    --btn-green:#8FD3A6;
+
+    --capsule-urgent:#FF7F73;
+    --capsule-done:#D0D3D8;
+    --capsule-border:#111111;
+
+    --chip-bg:#E3E6EE;
+    --chip-border:#C9CEDA;
+
+    --pad-x:28px;
+    --pad-y:22px;
 }
 
 *{ box-sizing:border-box; }
 html,body,#root{ height:100%; overflow:hidden; }
 body{
+    margin:0;
     font-family: ui-sans-serif,system-ui,-apple-system,"Pretendard",Segoe UI,Roboto,"Noto Sans KR";
-    color:var(--ink);                 /* ★ 헤더바 제외 모든 글자 검은색 */
-    background:var(--bg);
-    overflow-x:hidden;
+    color:var(--ink); background:var(--bg);
 }
 
-/* 상단바 */
+/* ===== 상단바 ===== */
 .topbar{
     position:fixed; left:0; right:0; top:0; height:68px;
     display:flex; align-items:center; justify-content:center;
-    background:var(--blue); color:#fff; font-weight:800;
+    background:var(--blue); color:#fff; font-weight:800; z-index:10;
 }
-.brandText{
-    position:absolute; left:50%; transform:translateX(-50%);
-    font-weight:900; font-size:24px; letter-spacing:1.2px;
-    color:#fff; text-shadow:0 1px 0 rgba(0,0,0,.06);
-}
-.brandLogo{
-    position:absolute; left:50%; transform:translateX(-50%);
-    height: 48px;                                        /* 원하면 24~32px로 조절 */
-}
-.hello{
-    position:absolute; right:24px; font-weight:700; display:flex; align-items:center; gap:8px;
-    color:#fff; /* 헤더바 안의 인사말만 흰색 */
-}
+.brandLogo{ position:absolute; left:50%; transform:translateX(-50%); height:48px; }
+.hello{ position:absolute; right:24px; font-weight:700; display:flex; align-items:center; gap:8px; }
 
-/* 레이아웃 */
-.app{ min-height:100vh; width:100vw; background:var(--bg); }
+/* ===== 레이아웃 ===== */
+.app{ min-height:100vh; width:100vw; }
 .shell{
-    margin-top:68px; background:var(--bg);
-    border-radius:0; min-height:calc(100vh - 68px);
-    display:grid; grid-template-columns:260px minmax(0,1fr); width:100%;
+    margin-top:68px;
+    height:calc(100vh - 68px);
+    display:grid; grid-template-columns:200px minmax(0,1fr);
 }
 .side{
-    background:#E9ECF7; border-right:1px solid #e5e7eb;
-    padding:24px; border-radius:0;
+    background:#E9ECF7; border-right:1px solid #dfe3ee; padding:16px 14px;
+    overflow:auto;
 }
-.main{ padding:24px 32px; }
-@media (min-width:1280px){ .main{ max-width:1100px; margin:0 auto; } }
-@media (max-width:960px){ .shell{ grid-template-columns:220px minmax(0,1fr);} }
-@media (max-width:720px){
-    .shell{ grid-template-columns:1fr; }
-    .side{ border-right:none; border-bottom:1px solid #e5e7eb; }
+.main{
+    display:flex; flex-direction:column; height:100%;
+    background:#fff; overflow:hidden;
 }
 
-/* 타이포(전부 검은색) */
-.h1{ font-size:28px; font-weight:900; color:var(--ink); margin:0 0 12px; }
-.h2{ font-size:22px; font-weight:800; color:var(--ink); margin:0; }
-.muted{ color:var(--ink); opacity:.72; font-size:14px; } /* 톤만 살짝 낮춤 */
-
-/* 버튼 */
-.btn{ padding:8px 12px; border-radius:8px; border:1px solid #d1d5db; background:#fff; cursor:pointer; }
-.btn.ok{ background:var(--ok); color:#fff; border-color:var(--ok); }
-.btn.danger{ background:#fff; color:#d32f2f; border-color:#f5bdbd; }
-.btn.ghost{ background:transparent; border:none; color:var(--ink); opacity:.7; }
-.btn.logout{
-    background: var(--logout);
-    border-color: var(--logout);
-    color: #fff !important;
-    font-weight: 800;
+/* 상단 과목 바(고정), 아래 컨텐츠만 스크롤 */
+.mainInner{ display:flex; flex-direction:column; height:100%; }
+.subjectsBar{ flex:0 0 auto; padding:calc(var(--pad-y) - 2px) var(--pad-x) 10px; }
+.contentArea{
+    flex:1 1 auto; min-height:0;
+    padding:0 var(--pad-x) var(--pad-y); overflow:hidden;
 }
-.btn.logout:hover{
-    background: var(--logout-hover);
-    border-color: var(--logout-hover);
-}  /* ★ hover */
 
-/* 학기 리스트 */
-.semList{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
-.semItem{ display:flex; justify-content:space-between; align-items:center; background:#fff; padding:10px 12px; border-radius:8px; }
+/* ===== 타이포 ===== */
+.h1{ font-size:26px; font-weight:900; margin:0 0 10px; }
+.h2{ font-size:22px; font-weight:800; margin:0; }
+.muted{ opacity:.72; font-size:14px; }
 
-/* 카드 */
+/* ===== 버튼 ===== */
+.btn{ padding:8px 12px; border-radius:8px; border:1px solid #d1d5db; background:#fff; cursor:pointer; color:#111; }
+.btn.ok{ background:var(--ok); color:#111 !important; border-color:var(--ok); } /* 모달에서 가독성 ↑ */
+.btn.logout{ background:var(--logout); border-color:var(--logout); color:#fff; font-weight:800; }
+.btn.logout:hover{ background:var(--logout-hover); border-color:var(--logout-hover); }
+.btn.outline{ background:transparent; color:#111; border:2px solid #111; font-weight:800; }
+.btn.outline.pill{ border-radius:999px; }
+.btn.outline.pill.xs{ padding:4px 10px; font-size:13px; }
+
+/* 학기 영역 */
+.headerRow{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.btn.iconCircle{
+    width:32px; height:32px; padding:0; border-radius:50%;
+    display:grid; place-items:center; line-height:1;
+    background:transparent; border:2px solid #111;
+}
+.btn.iconCircle.noborder{ border:none; }
+.forceTransparent{ background:transparent !important; border:none !important; }
+.icon24{ width:24px; height:24px; display:block; }
+.icon28{ width:28px; height:28px; display:block; }
+
+.semList{ display:flex; flex-direction:column; gap:8px; margin-top:6px; }
+.semRow{ position:relative; display:flex; align-items:center; justify-content:space-between; gap:6px; padding:2px 0 6px; }
+
+.semLink{ cursor:pointer; font-weight:700; padding:2px 0; position:relative; display:inline-block; color:#111; }
+.semLink:hover{ text-decoration:underline; }
+.semLink.active{ font-weight:900; color:#1F2D6B; }
+.semLink.active::after{
+    content:""; position:absolute; left:0; right:0; bottom:-2px;
+    height:2px; background:#1F2D6B; border-radius:1px; opacity:.6;
+}
+
+.semDelete.plainX{ border:none; background:transparent; cursor:pointer; font-weight:900; font-size:18px; line-height:1; opacity:.85; }
+.forceInk{ color:#111 !important; }
+
+/* 과목 칩 */
+.toolbar.wide{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.chips{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+/* ✅ 삭제 버튼과 이름 간격 늘림 */
+.chips.compact{ gap:10px; }                      /* 6px → 10px */
+.chipPill{
+    display:inline-flex; align-items:center; gap:12px;  /* 8px → 12px */
+    padding:5px 14px;                                   /* 5x12 → 5x14 */
+    border-radius:999px; background:var(--chip-bg); border:1px solid var(--chip-border);
+}
+.chipPill.slim{ padding:2px 10px; }
+.chipPill.strong{ background:var(--chip-bg); border-color:var(--chip-border); }
+.chipText{ font-weight:800; margin-left:4px; line-height:1; }
+.chipPill .x{ cursor:pointer; border:none; background:transparent; color:#495160; font-weight:900; line-height:1; margin-left:8px; }
+.chipPill .x:hover{ color:#111; }
+.chipAdd{ border:none; background:transparent; padding:0; margin-left:2px; cursor:pointer; }
+.chipAdd.inFlow{ display:inline-flex; align-items:center; margin-left:4px; }
+
+/* ===== 칼럼 & 내부 스크롤 ===== */
+.cols{ display:grid; grid-template-columns:0.95fr 1.05fr; gap:24px; height:100%; }
+.col{ display:flex; flex-direction:column; min-height:0; }
+.titleRow.fixed{ display:flex; align-items:center; justify-content:space-between; margin:4px 0 10px; }
+.listScroll{ flex:1 1 auto; min-height:0; overflow:auto; padding-right:6px; }
+.listScroll .taskCapsule + .taskCapsule{ margin-top:12px; }
+
+/* 우측 구분선 */
+.rightCol{ position:relative; padding-left:16px; }
+.rightCol::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:2px; background:#1f2937; border-radius:2px; opacity:.9; }
+
+/* ===== 캡슐형 과제 블럭 ===== */
 .taskBadge{
-    width:56px; height:56px; border-radius:50%;
+    width:72px; height:72px; border-radius:50%;
     background:#6A92F2; color:#fff; font-weight:900;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
+    flex:0 0 72px; box-shadow:0 2px 0 rgba(0,0,0,.08) inset;
 }
-.taskTitle{ font-size:20px; font-weight:900; }
-.taskCard{
-    border:1.5px solid #111; border-radius:12px;
-    padding:16px 18px; display:flex; align-items:center; justify-content:space-between; background:#fff;
-}
-.doneCard{
-    background:#ddd; border-radius:12px;
-    padding:16px 18px; display:flex; align-items:center; justify-content:space-between;
-}
-.actions{ display:flex; gap:8px; }
+.taskBadge .badgeMain{ font-size:16px; line-height:1.1; }
+.taskBadge .badgeSub{ font-size:13px; }
+.taskBadge.urgent{ background:#355DC0; }
+/* ✅ D-1/D-DAY/OVER 확대 */
+.taskBadge.isD{ width:72px; height:72px; }
+.taskBadge.isD .badgeMain{ font-size:18px; }
+.taskBadge.isD .badgeSub{ font-size:14px; }
 
-/* 모달(팝업) — 세련된 스타일 */
-.overlay{ position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; }
-.modal{
-    background:#fff; width:520px; max-width:92vw; border-radius:14px; padding:22px 22px 18px;
-    box-shadow:0 28px 60px rgba(0,0,0,.22);
+.taskCapsule{
+    display:flex; align-items:center; justify-content:space-between; gap:18px;
+    padding:18px 22px; border-radius:32px; border:2px solid var(--capsule-border);
+    background:#fff; box-shadow:0 2px 0 rgba(0,0,0,.12) inset;
 }
-.modal .btn { color: var(--ink) !important; }
+.taskCapsule.todo{ background:#fff; }
+.taskCapsule.urgent{ background:var(--capsule-urgent); border-color:var(--capsule-urgent); }
+.taskCapsule.done{ background:var(--capsule-done); border-color:var(--capsule-done); }
+
+.capsuleLeft{ display:flex; align-items:center; gap:18px; }
+.capsuleText .hashLine{ font-size:13px; opacity:.6; margin-bottom:2px; }
+.taskTitle{ font-size:24px; font-weight:900; letter-spacing:-.2px; }
+
+/* 정사각 버튼 */
+.capsuleActions{ display:flex; align-items:center; gap:8px; }
+.sqBtn{
+    width:32px; height:32px; border-radius:10px;
+    display:inline-flex; align-items:center; justify-content:center;
+    border:1px solid rgba(0,0,0,.12); background:#fff; cursor:pointer; font-weight:900;
+}
+.sqBtn.red{   background:var(--btn-red); border-color:var(--btn-red); }
+.sqBtn.blue{  background:var(--btn-blue); border-color:var(--btn-blue); }
+.sqBtn.green{ background:var(--btn-green); border-color:var(--btn-green); color:#0b3; }
+
+/* ===== 모달 ===== */
+.overlay{ position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:20; }
+.modal{ background:#fff; width:520px; max-width:92vw; border-radius:14px; padding:22px 22px 18px; box-shadow:0 28px 60px rgba(0,0,0,.22); }
 .modalHeader{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-.modalHeader .btn { color: var(--ink) !important; }
-.modalTitle{ font-size:18px; font-weight:800; color:var(--ink); }
+.modalTitle{ font-size:18px; font-weight:800; }
 .modalBody{ display:flex; flex-direction:column; gap:12px; }
 .field{ display:flex; flex-direction:column; gap:6px; }
-.label{ font-size:13px; font-weight:700; color:var(--ink); }
+.label{ font-size:13px; font-weight:700; }
 .input{ padding:12px 14px; border-radius:10px; border:1px solid #cfd5de; background:#fff; color:var(--ink); }
 .modalActions{ display:flex; justify-content:flex-end; gap:8px; margin-top:6px; }
+.modal .btn{ color:#111 !important; }
 
-/* 로그인 */
+/* ===== 로그인 ===== */
 .login-full{ min-height:100vh; width:100vw; display:grid; place-items:center; background:var(--bg); }
 .login-panel{
     width:480px; max-width:92vw; background:#fff; border:1px solid #e6eaf2;
@@ -126,24 +192,146 @@ body{
 }
 .logoRing{ width:96px; height:96px; border-radius:50%; background:#6A92F2; display:grid; place-items:center; box-shadow:0 6px 16px rgba(0,0,0,.12); }
 .logoRing img{ width:64px; height:64px; }
-.loginTitleCenter{ text-align:center; font-size:22px; font-weight:800; color:var(--ink); }
+.loginTitleCenter{ text-align:center; font-size:22px; font-weight:800; }
 .inputLarge{
     width:100%; max-width:360px; display:block; margin:0 auto;
     padding:14px 16px; border-radius:12px; border:1.5px solid #cbd5e1;
     background:#fff !important; color:#111 !important; caret-color:#111; font-size:16px;
 }
-.inputLarge::placeholder{ color:#9ca3af; opacity:1; }
-.inputLarge:-webkit-autofill,
-.inputLarge:-webkit-autofill:hover,
-.inputLarge:-webkit-autofill:focus{
-    -webkit-text-fill-color:#111 !important;
-    transition:background-color 5000s ease-in-out 0s;
-    box-shadow:0 0 0px 1000px #fff inset !important;
-}
-.loginBigBtn{
-    width:100%; max-width:360px; display:block; margin:0 auto;
-    padding:14px 16px; border-radius:12px;
-    border:1px solid var(--ok); background:var(--ok); color:#fff; font-weight:800; font-size:16px;
-}
-.loginHelp{ color:var(--ink); opacity:.72; text-align:center; font-size:14px; }
+.loginHelp{ opacity:.72; text-align:center; font-size:14px; }
 .topbar.login-hidden{ display:none; }
+
+/* 상태 배너 */
+.globalError{ position:absolute; left:50%; transform:translateX(-50%); top:80px; background:#ffe5e5; color:#b3261e; padding:6px 10px; border-radius:8px; border:1px solid #ffc4c4; z-index:11; }
+.globalLoading{ position:absolute; left:50%; transform:translateX(-50%); top:80px; background:#eef3ff; color:#1f2d6b; padding:6px 10px; border-radius:8px; border:1px solid #cfd7ff; z-index:11; }
+
+/* 빈 상태 중앙정렬 */
+.emptyFlexCenter{
+    height:100%; display:flex; align-items:center; justify-content:center;
+}
+
+/* ===== FAB & 달력 ===== */
+.fab{
+    position:fixed; right:20px; bottom:20px; z-index:25;
+    width:64px; height:64px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    border:2px solid #111; background:#fff; color:#111;
+    box-shadow:0 8px 24px rgba(0,0,0,.15);
+    cursor:pointer;
+}
+
+.calHeader{
+    display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:10px;
+}
+.calTitle{ font-weight:900; font-size:16px; }
+.calNavBtn {
+    width:36px; height:32px;
+    border-radius:8px;
+    border:1px solid #cfd5de;
+    background:#fff;
+    color:#111;          /* 기호 색상을 확실히 */
+    font-size:18px;      /* 기호 크게 */
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+}
+.calIcon{
+    width:18px; height:18px; display:block;
+}
+.calNavBtn:hover {
+    background:#f5f7ff; border-color:#bfc7d6;
+}
+.calNavBtn:active {
+  background:#ecf0ff; border-color:#aeb7ca;
+}
+.calNavBtn:focus-visible{
+  outline:2px solid #2d5cff; outline-offset:2px;
+}
+
+/* ✅ 달력 전체 한 화면에 – 그리드 행 높이 고정 & 셀 내부 스크롤 */
+.calGrid{
+    display:grid; grid-template-columns:repeat(7, 1fr);
+    gap:5px;
+    flex:1 1 auto; min-height:0;
+    grid-auto-rows:88px; /* 6행이 화면에 모두 보이도록 */
+    overflow:visible;
+}
+/* 달력 모달 너비 확대 & 높이 제한 */
+.modal:has(.calendarModal){ width:1200px; max-width:96vw; }
+.calendarModal{
+    display:flex; flex-direction:column;
+    max-height:85vh;
+}
+.calHeader {
+    display:flex;
+    align-items:center;
+    justify-content:space-between; /* 좌우 끝에 버튼, 가운데 타이틀 */
+    margin-bottom:8px;
+}
+.calTitle {
+     font-weight:900;
+     font-size:16px;
+     text-align:center;
+     flex:1;              /* 버튼이 눌려도 가운데 고정 */
+ }
+/* 요일 헤더 전용 행 (그리드 분리) */
+.calHeaderRow{
+    display:grid;
+    grid-template-columns:repeat(7, 1fr);
+    margin: 2px 0 6px;          /* 요일과 날짜칸 사이 최소 간격 */
+}
+.calHeaderRow .calDow{
+    text-align:center;
+    font-weight:800;
+    opacity:.75;
+    padding: 2px 0;             /* 너무 넓지 않게 */
+}
+.calDow{ text-align:center; font-weight:800; opacity:.7;}
+.calDay{
+    border:1px solid #e2e4ea; border-radius:8px; background:#fff;
+    min-height:unset; padding:6px;
+    display:flex; flex-direction:column;
+}
+.calDay.out{ background:#fafbff; opacity:.85; }
+.calDate{ font-weight:800; font-size:13px; margin-bottom:4px; }
+.calItems{ position:relative; flex:1 1 auto; min-height:0; overflow:visible; }
+.calItemsScroll{ height: 100%; overflow: auto;}
+.calItem .calName{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* 캘린더 말풍선 툴팁 */
+.calItem{ border:1px solid #e7eaf3; border-radius:8px; padding:6px; background:#f9fbff; display:flex; flex-direction:column; }
+.calItem[data-tip]:hover::after{
+    content: attr(data-tip);
+    position: absolute;
+    left: 8px;
+    bottom: 100%;
+    transform: translateY(-8px);
+    max-width: 240px;
+    background: rgba(17,17,17,.92);
+    color: #fff;
+    font-size: 12px;
+    line-height: 1.3;
+    padding: 6px 8px;
+    border-radius: 8px;
+    white-space: normal;
+    z-index: 1000;
+    box-shadow: 0 8px 24px rgba(0,0,0,.18);
+}
+.calItem[data-tip]:hover::before{
+    content: "";
+    position: absolute;
+    left: 18px;
+    bottom: 100%;
+    transform: translateY(0px);
+    border: 6px solid transparent;
+    border-top-color: rgba(17,17,17,.92); /* 말풍선 꼬리 */
+}
+.calItem.todo{ background:#f9fbff; border-color:#dfe7ff; }
+.calItem.urgent{ background:#fff4e9; border-color:#ffd7bd; }
+.calItem.done{ background:#f2f6f3; border-color:#cfe3d1; }
+.calHash{ font-size:11px; opacity:.7; margin-bottom:2px; }
+.calName{ font-size:13px; font-weight:800; }

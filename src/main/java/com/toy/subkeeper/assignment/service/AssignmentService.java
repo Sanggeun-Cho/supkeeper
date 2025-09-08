@@ -64,6 +64,7 @@ public class AssignmentService {
         if(reqDto.getDueDate() != null) {
             assignment.setDueDate(reqDto.getDueDate());
         }
+        assignment.setCategory(reqDto.getCategory());
 
         log.info("과제 수정: {} (id= {})", assignment.getAssignName(), assignment.getId());
         return assignment;
