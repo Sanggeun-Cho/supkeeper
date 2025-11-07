@@ -274,11 +274,11 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
     const [showCalendar, setShowCalendar] = useState(false);
     const [calRefDate, setCalRefDate] = useState<Date>(new Date());
     const [calItems, setCalItems] = useState<{subName:string; dueDate:string; assignName:string; category:number}[]|null>(null);
-    const [calLoading, setCalLoading] = useState(false);
-    const [calError, setCalError] = useState<string|undefined>();
+    const [calLoading] = useState(false);
+    const [calError] = useState<string|undefined>();
 
     // 배지 리프레시(1분 주기) – 저장 직후/시간 경과 시 갱신
-    const [nowTick, setNowTick] = useState(0);
+    const [, setNowTick] = useState(0);
     useEffect(()=>{
         const t = setInterval(()=>setNowTick(Date.now()), 60_000);
         return ()=>clearInterval(t);
@@ -463,7 +463,7 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
             const sid = (raw === 0 || raw) ? Number(raw) : undefined;
 
             // ✅ 어떤 형식이 와도 YMD로 뽑아서 프리셋
-            const ymd = shiftYMD(pickYMD(edit.dueDate), 1) || "";
+            const ymd = shiftYMD(pickYMD(edit.dueDate) ?? "", 1) || "";
 
             setAssignForm({
                 assignId: edit.assignId,
