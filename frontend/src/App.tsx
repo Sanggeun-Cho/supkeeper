@@ -30,7 +30,7 @@ interface Dashboard {
 }
 
 /** ===== 상수/유틸 ===== */
-const API_BASE = ""; // 동일 포트 정적서빙이면 비워도 OK
+const API_BASE = "/api"; // 동일 포트 정적서빙이면 비워도 OK
 
 const CATEGORY_LABEL: Record<number, "과제" | "강의" | "할 일"> = {
     0: "과제",
@@ -132,7 +132,7 @@ const createSemester = (userId:number, semName:string)=>
     api<SemesterItem>("/semester",{ method:"POST", headers:{ "X-USER-ID":String(userId) }, body:JSON.stringify({ semName }) });
 
 const deleteSemester = (semId:number)=>
-    fetch(`/semester/${semId}`,{ method:"DELETE" }).then(()=>{});
+    fetch(`/semester/${semId}`,{ method:"DELETE" });
 
 const getDashboard = (userId:number, semId:number)=>
     api<Dashboard>(`/semester/${semId}/dashboard`,{ headers:{ "X-USER-ID":String(userId) } });
@@ -141,7 +141,7 @@ const createSubject = (semId:number, subName:string)=>
     api<Subject>(`/subject/${semId}`,{ method:"POST", body:JSON.stringify({ subName }) });
 
 const deleteSubject = (subId:number)=>
-    fetch(`/subject/${subId}`,{ method:"DELETE" }).then(()=>{});
+    fetch(`/subject/${subId}`,{ method:"DELETE" });
 
 const createAssignment = (subId:number, payload:{assignName:string;dueDate:string;category:number;})=>
     api<Assignment>(`/assignment/subject/${subId}`,{ method:"POST", body:JSON.stringify({ ...payload, subId }) });
@@ -150,7 +150,7 @@ const updateAssignment = (assignId:number, payload:{assignName:string;dueDate:st
     api<Assignment>(`/assignment/${assignId}`,{ method:"PATCH", body:JSON.stringify(payload) });
 
 const deleteAssignment = (assignId:number)=>
-    fetch(`/assignment/${assignId}`,{ method:"DELETE" }).then(()=>{});
+    fetch(`/assignment/${assignId}`,{ method:"DELETE" });
 
 const toggleComplete = (assignId:number, isComplete:number)=>
     api<{assignId:number;isComplete:number;dueDate:string}>(`/assignment/${assignId}/complete`,{ method:"PATCH", body:JSON.stringify({ isComplete }) });
