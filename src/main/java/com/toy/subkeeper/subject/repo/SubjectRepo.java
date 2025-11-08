@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface SubjectRepo extends JpaRepository<Subject, Long> {
-    boolean existsBySubName(String subName);
+    boolean existsBySemester_SemIdAndSubName(Long semId, String subName);
 
     // 학기와 과제 관계성
     List<Subject> findBySemester_Id(Long semId);

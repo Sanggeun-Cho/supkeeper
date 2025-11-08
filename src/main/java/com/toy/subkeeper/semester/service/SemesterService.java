@@ -34,12 +34,13 @@ public class SemesterService {
     // 학기 생성
     public Semester createSemester(Long userId, SemesterDto.SemesterCreateReqDto semCreateReqDto) {
         String semName = semCreateReqDto.getSemName().trim(); // 공백 제거
+        if (semName.isEmpty()) {
+            throw new IllegalArgumentException("학기 이름은 필수입니다.");
+        }
 
-        // 이미 있는 학기 이름일 경우
-        if(semesterRepo.existsBySemName(semName)) {
-            log.info("존재하는 학기 이름: {})", semName);
-
-            throw new DuplicateSemNameException("이미 존재하는 학기입니다. : " + semName);
+        // 동일 사용자 내 중복 확인
+        if (semesterRepo.existsByUser_UserIdAndSemName(userId, semName)) {
+            throw new DuplicateSemNameException("해당 사용자에 이미 존재하는 학기입니다: " + semName);
         }
         
         // userId 조회

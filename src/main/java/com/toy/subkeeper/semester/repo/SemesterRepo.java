@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SemesterRepo extends JpaRepository<Semester, Long> {
-    boolean existsBySemName(String name);
+    boolean existsByUser_UserIdAndSemName(Long userId, String semName);
 
     // 과도한 fetch join 방지를 위한 Semester + User 로드 단계
     @Query("""

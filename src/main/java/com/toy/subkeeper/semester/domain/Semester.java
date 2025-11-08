@@ -16,7 +16,7 @@ public class Semester {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 50)
+    @Column(nullable = false, length = 50)
     private String semName;
 
     // 과목과 one to many 관계, 학기가 삭제되면 과목들도 모두 지워짐

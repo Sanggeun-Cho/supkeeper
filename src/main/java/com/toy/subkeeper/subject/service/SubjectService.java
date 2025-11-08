@@ -24,10 +24,10 @@ public class SubjectService {
         String subName = subjectCreateReqDto.getSubName().trim(); // 공백 제거
 
         // 이미 있는 과목 이름일 경우
-        if(subjectRepo.existsBySubName(subName)) {
-            log.info("존재하는 과목 이름: {})", subName);
+        if (subjectRepo.existsBySemester_SemIdAndSubName(semId, subName)) {
+            log.info("동일 학기({})에 이미 존재하는 과목 이름: {}", semId, subName);
 
-            throw new DuplicateSubNameException("이미 존재하는 과목입니다. : " + subName);
+            throw new DuplicateSubNameException("동일 학기 내 이미 존재하는 과목입니다: " + subName);
         }
 
         // semId 조회
