@@ -132,7 +132,7 @@ const createSemester = (userId:number, semName:string)=>
     api<SemesterItem>("/semester",{ method:"POST", headers:{ "X-USER-ID":String(userId) }, body:JSON.stringify({ semName }) });
 
 const deleteSemester = (semId:number)=>
-    fetch(`/semester/${semId}`,{ method:"DELETE" });
+    api<void>(`/semester/${semId}`,{ method:"DELETE" });
 
 const getDashboard = (userId:number, semId:number)=>
     api<Dashboard>(`/semester/${semId}/dashboard`,{ headers:{ "X-USER-ID":String(userId) } });
@@ -141,7 +141,7 @@ const createSubject = (semId:number, subName:string)=>
     api<Subject>(`/subject/${semId}`,{ method:"POST", body:JSON.stringify({ subName }) });
 
 const deleteSubject = (subId:number)=>
-    fetch(`/subject/${subId}`,{ method:"DELETE" });
+    api<void>(`/subject/${subId}`,{ method:"DELETE" });
 
 const createAssignment = (subId:number, payload:{assignName:string;dueDate:string;category:number;})=>
     api<Assignment>(`/assignment/subject/${subId}`,{ method:"POST", body:JSON.stringify({ ...payload, subId }) });
@@ -150,7 +150,7 @@ const updateAssignment = (assignId:number, payload:{assignName:string;dueDate:st
     api<Assignment>(`/assignment/${assignId}`,{ method:"PATCH", body:JSON.stringify(payload) });
 
 const deleteAssignment = (assignId:number)=>
-    fetch(`/assignment/${assignId}`,{ method:"DELETE" });
+    api<void>(`/assignment/${assignId}`,{ method:"DELETE" });
 
 const toggleComplete = (assignId:number, isComplete:number)=>
     api<{assignId:number;isComplete:number;dueDate:string}>(`/assignment/${assignId}/complete`,{ method:"PATCH", body:JSON.stringify({ isComplete }) });
