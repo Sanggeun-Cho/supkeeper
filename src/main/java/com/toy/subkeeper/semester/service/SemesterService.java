@@ -39,7 +39,7 @@ public class SemesterService {
         }
 
         // 동일 사용자 내 중복 확인
-        if (semesterRepo.existsByUser_UserIdAndSemName(userId, semName)) {
+        if (semesterRepo.existsByUser_IdAndSemName(userId, semName)) {
             throw new DuplicateSemNameException("해당 사용자에 이미 존재하는 학기입니다: " + semName);
         }
         
