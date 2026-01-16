@@ -1,9 +1,9 @@
-package com.toy.subkeeper.subject.controller;
+package com.toy.subkeeper.controller;
 
 import com.toy.subkeeper.DTO.SubjectDto;
 import com.toy.subkeeper.exception.DuplicateSubNameException;
-import com.toy.subkeeper.subject.domain.Subject;
-import com.toy.subkeeper.subject.service.SubjectService;
+import com.toy.subkeeper.domain.Subject;
+import com.toy.subkeeper.service.SubjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

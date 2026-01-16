@@ -1,7 +1,7 @@
-package com.toy.subkeeper.semester.domain;
+package com.toy.subkeeper.domain;
 
-import com.toy.subkeeper.subject.domain.Subject;
-import com.toy.subkeeper.user.domain.User;
+import com.toy.subkeeper.domain.Subject;
+import com.toy.subkeeper.domain.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

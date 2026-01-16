@@ -1,17 +1,17 @@
-package com.toy.subkeeper.semester.service;
+package com.toy.subkeeper.service;
 
 import com.toy.subkeeper.DTO.CalendarDto;
 import com.toy.subkeeper.DTO.DashboardDto;
 import com.toy.subkeeper.DTO.SemesterDto;
-import com.toy.subkeeper.assignment.domain.Assignment;
-import com.toy.subkeeper.assignment.repo.AssignmentRepo;
+import com.toy.subkeeper.domain.Assignment;
+import com.toy.subkeeper.repository.AssignmentRepo;
 import com.toy.subkeeper.exception.DuplicateSemNameException;
-import com.toy.subkeeper.semester.domain.Semester;
-import com.toy.subkeeper.semester.repo.SemesterRepo;
-import com.toy.subkeeper.subject.domain.Subject;
-import com.toy.subkeeper.subject.repo.SubjectRepo;
-import com.toy.subkeeper.user.domain.User;
-import com.toy.subkeeper.user.repo.UserRepo;
+import com.toy.subkeeper.domain.Semester;
+import com.toy.subkeeper.repository.SemesterRepo;
+import com.toy.subkeeper.domain.Subject;
+import com.toy.subkeeper.repository.SubjectRepo;
+import com.toy.subkeeper.domain.User;
+import com.toy.subkeeper.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -72,7 +72,7 @@ public class SemesterService {
 
     // 대시보드 이동
     @Transactional(readOnly = true)
-    public DashboardDto.DashboardViewDto getDashboardView(Long userId, Long semIdNullable) {
+    public DashboardDto.DashboardViewDto getDashboardView(Long userId, Long semIdNullable, Long subId, List<Integer> categories) {
         // 유저의 모든 학기 조회
         List<Semester> allSemesters = semesterRepo.findByUser_IdOrderByIdDesc(userId);
         if(allSemesters.isEmpty()) {
@@ -99,7 +99,10 @@ public class SemesterService {
                 .toList();
 
         // 과제 칸, 모두 최신순으로 정렬
-        List<Assignment> all = assignmentRepo.findAllBySemesterIdOrderByDueDateAsc(semId);
+        if(categories != null && categories.isEmpty()) {
+            categories = null; // 카테고리 리스트가 비어있으면 null로 처리해야 쿼리문에서 올바르게 인식
+        }
+        List<Assignment> all = assignmentRepo.findAllBySemesterIdOrderByDueDateAsc(semId, subId, categories);
 
         List<DashboardDto.DashboardDtoBuilder.AssignmentListDto> incompleteDtos = all.stream()
                 .filter(a -> a.getIsComplete() != 1)     // 0: 미완료, 2: 하루 남은 과제

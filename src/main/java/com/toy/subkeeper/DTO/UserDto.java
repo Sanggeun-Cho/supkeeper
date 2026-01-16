@@ -6,16 +6,16 @@ import lombok.*;
 
 public class UserDto {
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
-    public static class UserCreateReqDto {
-        @NotNull(message = "사용자 필수")
-        @Size(max = 50)
-        private String userName;
+    public static class GoogleLoginReqDto {
+        // 프론트에서 넘어오는 구글 ID 토큰
+        private String credential;
     }
 
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
-    public static class UserCreateResDto {
+    public static class UserLoginResDto {
         private Long userId;
         private String userName;
+        private String email;
         private Long lastSemId;
     }
 }

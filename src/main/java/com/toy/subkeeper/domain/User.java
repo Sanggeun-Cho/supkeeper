@@ -1,6 +1,5 @@
-package com.toy.subkeeper.user.domain;
+package com.toy.subkeeper.domain;
 
-import com.toy.subkeeper.semester.domain.Semester;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,13 +14,17 @@ public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 50)
+    @Column(unique = true, nullable = false, length = 100)
+    private String email;
+
+    @Column(unique = false, nullable = false, length = 50)
     private String userName;
 
     @OneToMany(mappedBy = "user")
     private List<Semester> semesterList = new ArrayList<>();
 
-    public User(String userName) {
+    public User(String email, String userName) {
+        this.email = email;
         this.userName = userName;
     }
 }

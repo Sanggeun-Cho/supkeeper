@@ -1,6 +1,6 @@
-package com.toy.subkeeper.assignment.domain;
+package com.toy.subkeeper.domain;
 
-import com.toy.subkeeper.subject.domain.Subject;
+import com.toy.subkeeper.domain.Subject;
 import jakarta.persistence.*;
 import lombok.*;
 

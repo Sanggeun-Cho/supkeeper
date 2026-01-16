@@ -1,8 +1,8 @@
-package com.toy.subkeeper.assignment.controller;
+package com.toy.subkeeper.controller;
 
 import com.toy.subkeeper.DTO.AssignmentDto;
-import com.toy.subkeeper.assignment.domain.Assignment;
-import com.toy.subkeeper.assignment.service.AssignmentService;
+import com.toy.subkeeper.domain.Assignment;
+import com.toy.subkeeper.service.AssignmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

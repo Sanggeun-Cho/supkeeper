@@ -1,16 +1,18 @@
-package com.toy.subkeeper.semester.controller;
+package com.toy.subkeeper.controller;
 
 import com.toy.subkeeper.DTO.CalendarDto;
 import com.toy.subkeeper.DTO.DashboardDto;
 import com.toy.subkeeper.DTO.SemesterDto;
 import com.toy.subkeeper.exception.DuplicateSemNameException;
-import com.toy.subkeeper.semester.domain.Semester;
-import com.toy.subkeeper.semester.service.SemesterService;
+import com.toy.subkeeper.domain.Semester;
+import com.toy.subkeeper.service.SemesterService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,9 +55,11 @@ public class SemesterController {
             "Res : Dto 참조")
     public ResponseEntity<DashboardDto.DashboardViewDto> getDashboardView(
             @RequestHeader("X-USER-ID") Long userId,
-            @PathVariable Long semId
-    ) {
-        DashboardDto.DashboardViewDto res = semesterService.getDashboardView(userId, semId);
+            @PathVariable Long semId,
+            @RequestParam(name = "subId", required = false) Long subId,
+            @RequestParam(name = "categories", required = false) List<Integer> categories
+            ) {
+        DashboardDto.DashboardViewDto res = semesterService.getDashboardView(userId, semId, subId, categories);
         return ResponseEntity.ok(res);
     }
 

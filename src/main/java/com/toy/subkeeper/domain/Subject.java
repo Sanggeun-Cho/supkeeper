@@ -1,7 +1,5 @@
-package com.toy.subkeeper.subject.domain;
+package com.toy.subkeeper.domain;
 
-import com.toy.subkeeper.assignment.domain.Assignment;
-import com.toy.subkeeper.semester.domain.Semester;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,7 +24,6 @@ public class Subject {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "sem_id", nullable = false)
     private Semester semester;
-
 
     public Subject(String subName, Semester semester) {
         this.subName = subName;

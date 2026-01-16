@@ -15,8 +15,14 @@ import calNextIcon from "./assets/cal_next.svg";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
+/* ✅ 구글 로그인 라이브러리 */
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+
+/* ⚠️ 구글 클라우드 콘솔에서 발급받은 Client ID */
+const GOOGLE_CLIENT_ID = "819117992716-vte3g2rcp56uo6l8tfr3nk3ve6o9kc7h.apps.googleusercontent.com";
+
 /** ===== 타입 ===== */
-interface User { userId:number; userName:string; lastSemId?: number | null }
+interface User { userId:number; userName:string; email?:string; lastSemId?: number | null }
 interface SemesterItem { semId:number; semName:string; current?:boolean }
 interface Subject { subId:number; subName:string }
 interface Assignment {
@@ -30,7 +36,7 @@ interface Dashboard {
 }
 
 /** ===== 상수/유틸 ===== */
-const API_BASE = "/api"; // 동일 포트 정적서빙이면 비워도 OK
+const API_BASE = "";
 
 const CATEGORY_LABEL: Record<number, "과제" | "강의" | "할 일"> = {
     0: "과제",
@@ -38,7 +44,28 @@ const CATEGORY_LABEL: Record<number, "과제" | "강의" | "할 일"> = {
     2: "할 일",
 };
 
-/** Date → 로컬 기준 YYYY-MM-DD (타임존 안전) */
+/** 과목명 글자수 제한 */
+function truncateSubject(name: string): string {
+    if (!name) return "";
+    const hasKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(name);
+    const limit = hasKorean ? 10 : 16;
+    return name.length > limit ? name.slice(0, limit) + "..." : name;
+}
+
+/** 입력 핸들러용 길이 제한 함수 (과목) */
+function limitSubjectInput(val: string): string {
+    const hasKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(val);
+    const limit = hasKorean ? 10 : 16;
+    if (val.length > limit) return val.slice(0, limit);
+    return val;
+}
+
+/** 학기 이름 길이 제한 */
+function limitSemesterInput(val: string): string {
+    return val.slice(0, 8);
+}
+
+/** Date → 로컬 기준 YYYY-MM-DD */
 function toYMDLocal(date: Date){
     const y = date.getFullYear();
     const m = `${date.getMonth()+1}`.padStart(2,"0");
@@ -46,20 +73,20 @@ function toYMDLocal(date: Date){
     return `${y}-${m}-${d}`;
 }
 
-/** YYYY-MM-DD → 로컬 Date (00:00) */
+/** YYYY-MM-DD → 로컬 Date */
 function parseYMDLocal(ymd:string){
     const [y,m,d] = ymd.split("-").map(Number);
     return new Date(y, m-1, d, 0,0,0,0);
 }
 
-/** "YYYY-MM-DD" 또는 "YYYY-MM-DD HH:mm:ss.SSSSSS" → "YYYY-MM-DD" */
+/** 문자열에서 날짜 추출 */
 function pickYMD(dateStr: string): string | null {
     if (!dateStr) return null;
     const m = dateStr.match(/(\d{4})\D(\d{2})\D(\d{2})/);
     return m ? `${m[1]}-${m[2]}-${m[3]}` : null;
 }
 
-/** 하루 추가 */
+/** 날짜 하루 이동 */
 function shiftYMD(ymd: string, days: number): string {
     const [y,m,d] = ymd.split("-").map(Number);
     const dt = new Date(y, m-1, d);
@@ -67,40 +94,38 @@ function shiftYMD(ymd: string, days: number): string {
     return toYMDLocal(dt);
 }
 
-/** 화면 표시에만 적용할 날짜 보정값 (원하신 대로 +1일) */
 const DATE_OFFSET_DAYS_FOR_DISPLAY = 1;
 
+/** ✅ [수정] 배지 로직: overdue(기한 지남) 상태 추가 */
 function getBadgeForFront(dueDate: string, isComplete: number, serverLabel?: string){
-    // 완료(1)는 임박 아님
-    if (isComplete === 1) return { label: serverLabel || "DUE", urgent: false };
+    // 완료된 건 기본 처리
+    if (isComplete === 1) return { label: serverLabel || "DUE", urgent: false, overdue: false };
 
     const ymd = pickYMD(dueDate);
-    if (!ymd) return { label: serverLabel || "DUE", urgent: false };
+    if (!ymd) return { label: serverLabel || "DUE", urgent: false, overdue: false };
 
-    // 자정 기준 Date로 변환 (로컬)
     const due = (() => {
         const [y,m,d] = ymd.split("-").map(Number);
         const dt = new Date(y, m-1, d, 0, 0, 0, 0);
         return Number.isNaN(dt.getTime()) ? null : dt;
     })();
-    if (!due) return { label: serverLabel || "DUE", urgent: false };
+    if (!due) return { label: serverLabel || "DUE", urgent: false, overdue: false };
 
     const today = new Date();
     today.setHours(0,0,0,0);
 
-    // 일수 차이(오늘=-1, 내일=0)
     const diffDays = Math.round((due.getTime() - today.getTime()) / 86_400_000);
 
-    // 캘린더는 임박 필요 없다고 하셨으니, 목록 배지 기준만 단순화
-    // 서버가 임박 신호(2)를 주는 항목에서만 오늘/내일 라벨링
-    if (diffDays === 0) return { label: "D-1",   urgent: true };
-    if (diffDays === -1) return { label: "D-DAY", urgent: true };
+    // 기존 로직 유지
+    if (diffDays === 0) return { label: "D-1",   urgent: true, overdue: false };
+    if (diffDays === -1) return { label: "D-DAY", urgent: true, overdue: false };
+    
+    // ✅ [추가] 기한 지남 (D-DAY 보다 과거)
+    if (diffDays < -1) return { label: "OVER", urgent: true, overdue: true };
 
-    // 임박 신호(2)가 아닌 경우에는 기본 라벨 유지
-    return { label: serverLabel || "DUE", urgent: false };
+    return { label: serverLabel || "DUE", urgent: false, overdue: false };
 }
 
-/** D-1/D-DAY 확대용 isD 클래스 추가 */
 const DateBadge:React.FC<{label:string; urgent:boolean}> = ({label, urgent})=>{
     const isD = label === "D-1" || label === "D-DAY" || label === "OVER";
     const [m, day] = isD ? [label, ""] : (label || "").split(" ");
@@ -124,9 +149,12 @@ async function api<T>(path:string, init?:RequestInit):Promise<T>{
         : (undefined as T);
 }
 
-/** ===== API 래퍼 ===== */
-const createOrFetchUser = (userName:string)=>
-    api<User>("/user",{ method:"POST", body:JSON.stringify({ userName }) });
+/** API 래퍼 */
+const googleLoginApi = (credential: string) =>
+    api<User>("/user/login/google", {
+        method: "POST",
+        body: JSON.stringify({ credential })
+    });
 
 const createSemester = (userId:number, semName:string)=>
     api<SemesterItem>("/semester",{ method:"POST", headers:{ "X-USER-ID":String(userId) }, body:JSON.stringify({ semName }) });
@@ -134,8 +162,18 @@ const createSemester = (userId:number, semName:string)=>
 const deleteSemester = (semId:number)=>
     api<void>(`/semester/${semId}`,{ method:"DELETE" });
 
-const getDashboard = (userId:number, semId:number)=>
-    api<Dashboard>(`/semester/${semId}/dashboard`,{ headers:{ "X-USER-ID":String(userId) } });
+const getDashboard = (userId:number, semId:number, subId?:number|null, categories?:number[]) => {
+    const params = new URLSearchParams();
+    if (subId != null) params.append("subId", String(subId));
+    if (categories && categories.length > 0) {
+        params.append("categories", categories.join(","));
+    }
+    const query = params.toString() ? `?${params.toString()}` : "";
+    
+    return api<Dashboard>(`/semester/${semId}/dashboard${query}`, {
+        headers: { "X-USER-ID": String(userId) }
+    });
+};
 
 const createSubject = (semId:number, subName:string)=>
     api<Subject>(`/subject/${semId}`,{ method:"POST", body:JSON.stringify({ subName }) });
@@ -155,7 +193,6 @@ const deleteAssignment = (assignId:number)=>
 const toggleComplete = (assignId:number, isComplete:number)=>
     api<{assignId:number;isComplete:number;dueDate:string}>(`/assignment/${assignId}/complete`,{ method:"PATCH", body:JSON.stringify({ isComplete }) });
 
-/** ✅ 달력 API 래퍼 (현재 학기 과제 채우기) */
 const getCalendar = (semId:number)=>
     api<{userName:string; items:{subName:string; dueDate:string; assignName:string; category:number}[]}>(
         `/semester/${semId}/calendar`
@@ -179,69 +216,41 @@ const Modal:React.FC<{ title:string; open:boolean; onClose:()=>void; children:Re
 
 /** ===== 로그인 화면 ===== */
 const LoginView:React.FC<{ onSuccess:(u:User)=>void }>=({ onSuccess })=>{
-    const [name, setName] = useState("");
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string|undefined>();
-    const [confirmOpen, setConfirmOpen] = useState(false);
-    const [candidate, setCandidate] = useState("");
-
-    // 묻지도 따지지도 않는 기존 로그인
-    // async function handleLogin(){
-    //     if(!name.trim()){ setError("이름을 입력하세요"); return; }
-    //     setError(undefined); setLoading(true);
-    //     try{
-    //         const user = await createOrFetchUser(name.trim());
-    //         onSuccess(user); // user: { userId, userName, lastSemId? }
-    //     }catch(e:any){
-    //         setError(e.message || "로그인 실패");
-    //     }finally{ setLoading(false); }
-    // }
-
-    function handlePrecheck(){
-        const nm = name.trim();
-        if(!nm) { setError("이름을 입력하세요"); return; }
-        setError(undefined);
-        setCandidate(nm);
-        setConfirmOpen(true);
-    }
-
-    async function handleConfirmLogin(){
-        setLoading(true);
-        try{
-            const user = await createOrFetchUser(candidate);
-            onSuccess(user);
-        } catch(e:any){
-            setError(e.message || "로그인 실패");
-        } finally {
-            setLoading(false);
-            setConfirmOpen(false);
-        }
-    }
 
     return (
         <div className="login-full">
             <div className="topbar login-hidden" />
             <div className="login-panel">
                 <div className="logoRing"><img src={logoImg} alt="2359" /></div>
-                <div className="loginTitleCenter">이름을 입력하세요</div>
-                <input className="inputLarge" placeholder="예: 홍길동" value={name} onChange={(e)=>setName(e.target.value)} />
-                {error && <div className="loginHelp" style={{ color:"#d32f2f" }}>{error}</div>}
-                <button className="loginBigBtn" onClick={handlePrecheck} disabled={loading}>{loading ? "진행 중…" : "2359 이용하기"}</button>
-                {/* 새 이름 확인 모달 */}
-                <Modal title="이름 확인" open={confirmOpen} onClose={()=>setConfirmOpen(false)}>
-                  <div className="field">
-                    <div className="label">입력한 이름</div>
-                    <div><b>‘{candidate}’</b>(으)로 진행하시겠습니까?</div>
-                    <div className="muted" style={{marginTop:6}}>
-                      이미 존재하는 이름이면 해당 사용자의 학기로 이동하고,<br/>
-                      없으면 새 사용자로 시작합니다.
-                    </div>
-                  </div>
-                  <div className="modalActions">
-                    <button className="btn" onClick={()=>setConfirmOpen(false)}>취소</button>
-                    <button className="btn ok" onClick={handleConfirmLogin}>확인</button>
-                  </div>
-                </Modal>
+                
+                <div className="loginTitleCenter">환영합니다!</div>
+                <div className="muted" style={{textAlign:"center", marginBottom: 20}}>
+                    Google 계정으로 간편하게 시작하세요.
+                </div>
+                
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <GoogleLogin
+                        onSuccess={async (credentialResponse) => {
+                            try {
+                                if (credentialResponse.credential) {
+                                    const user = await googleLoginApi(credentialResponse.credential);
+                                    localStorage.setItem("2359:user", JSON.stringify(user));
+                                    onSuccess(user);
+                                }
+                            } catch (e: any) {
+                                setError("로그인 처리 중 오류가 발생했습니다.");
+                                console.error(e);
+                            }
+                        }}
+                        onError={() => {
+                            setError("구글 로그인에 실패했습니다.");
+                        }}
+                        useOneTap
+                    />
+                </div>
+
+                {error && <div className="loginHelp" style={{ color:"#d32f2f", marginTop: 16 }}>{error}</div>}
             </div>
         </div>
     );
@@ -249,18 +258,19 @@ const LoginView:React.FC<{ onSuccess:(u:User)=>void }>=({ onSuccess })=>{
 
 /** ===== 대시보드 ===== */
 const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout })=>{
-    // 우선순위: localStorage > user.lastSemId > null
     const [semId, setSemId] = useState<number|null>(()=> {
         const saved = localStorage.getItem("2359:lastSemId");
         if (saved) return Number(saved);
         return (user.lastSemId ?? null) as number | null;
     });
 
+    const [filterSubId, setFilterSubId] = useState<number|null>(null); 
+    const [filterCats, setFilterCats] = useState<number[]>([]);       
+
     const [data, setData] = useState<Dashboard|null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string|undefined>();
 
-    // 모달 상태
     const [showSemModal, setShowSemModal]    = useState(false);
     const [newSemName, setNewSemName]        = useState("");
     const [showSubModal, setShowSubModal]    = useState(false);
@@ -270,14 +280,12 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
     const [pickerDate, setPickerDate]        = useState<Date|null>(null);
     const [creatingSem, setCreatingSem]      = useState(false);
 
-    // 캘린더 상태
     const [showCalendar, setShowCalendar] = useState(false);
     const [calRefDate, setCalRefDate] = useState<Date>(new Date());
     const [calItems, setCalItems] = useState<{subName:string; dueDate:string; assignName:string; category:number}[]|null>(null);
     const [calLoading] = useState(false);
     const [calError] = useState<string|undefined>();
 
-    // 배지 리프레시(1분 주기) – 저장 직후/시간 경과 시 갱신
     const [, setNowTick] = useState(0);
     useEffect(()=>{
         const t = setInterval(()=>setNowTick(Date.now()), 60_000);
@@ -285,37 +293,16 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
     },[]);
 
     const refreshingRef = React.useRef(false);
-
     const subjects = data?.dashboard.subjectList || [];
 
-    /** 초기 부트스트랩 */
-    useEffect(() => {
-        (async () => {
-            try{
-                if(semId != null){
-                    await load(semId);
-                }else{
-                    setData(null);
-                    setShowSemModal(true); // 최초 사용자: 학기 생성 유도
-                }
-            }catch(e:any){
-                setError(e.message || "초기화 실패");
-            }
-        })();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // 로그인 후 1회
-
-    // 대시보드 조회
-    async function load(sem:number){
+    async function load(targetSemId:number){
         setLoading(true); setError(undefined);
         try{
-            const d = await getDashboard(user.userId, sem);
+            const d = await getDashboard(user.userId, targetSemId, filterSubId, filterCats);
 
-            // ✅ subId → subName 매핑 (미지정 금지: 반드시 채움)
             const sMap = new Map<number, string>();
             (d.dashboard.subjectList || []).forEach(s => sMap.set(Number(s.subId), (s.subName || "").trim()));
 
-            // 반드시 매핑 주입 (미지정 방지)
             const norm = (arr: Assignment[]) => arr.map(a => {
                 const sid = a.subId != null ? Number(a.subId as any) : undefined;
                 const sname =
@@ -329,21 +316,43 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
                 complete:   norm(d.sections.complete   || [])
             };
 
-            setData(d); setSemId(sem);
-            localStorage.setItem("2359:lastSemId", String(sem));
+            setData(d);
+            setSemId(targetSemId);
+            localStorage.setItem("2359:lastSemId", String(targetSemId));
         }catch(e:any){
             setError(e.message || "불러오기 실패");
         }finally{ setLoading(false); }
     }
+
+    useEffect(() => {
+        if(semId != null){
+            load(semId);
+        }else{
+            setData(null);
+            setShowSemModal(true);
+        }
+    }, [semId, filterSubId, filterCats]);
+
+    const switchSemester = (id: number) => {
+        setFilterSubId(null);
+        setFilterCats([]);
+        setSemId(id);
+    };
+
+    const toggleCategory = (catIdx: number) => {
+        setFilterCats(prev => {
+            if (prev.includes(catIdx)) return prev.filter(c => c !== catIdx);
+            return [...prev, catIdx];
+        });
+    };
 
     async function silentRefresh(){
         if (!data?.dashboard.semId || refreshingRef.current) return;
         refreshingRef.current = true;
         try {
             const sem = data.dashboard.semId;
-            const d = await getDashboard(user.userId, sem);
+            const d = await getDashboard(user.userId, sem, filterSubId, filterCats);
 
-            // ── load()와 동일한 subId → subName 매핑 ──
             const sMap = new Map<number, string>();
             (d.dashboard.subjectList || []).forEach(s =>
                 sMap.set(Number(s.subId), (s.subName || "").trim())
@@ -366,45 +375,37 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
 
     useEffect(() => {
         const doRefresh = () => { silentRefresh(); };
-
         window.addEventListener("focus", doRefresh);
-
         const onVis = () => { if (document.visibilityState === "visible") doRefresh(); };
         document.addEventListener("visibilitychange", onVis);
-
         window.addEventListener("online", doRefresh);
-
         const t = setInterval(doRefresh, 60_000);
-
         return () => {
             window.removeEventListener("focus", doRefresh);
             document.removeEventListener("visibilitychange", onVis);
             window.removeEventListener("online", doRefresh);
             clearInterval(t);
         };
-    }, []);
+    }, [semId, filterSubId, filterCats]);
 
-    // 과목 id -> 이름 매핑
     const subNameById = useMemo(()=> {
         const map = new Map<number,string>();
         subjects.forEach(s=>map.set(Number(s.subId), s.subName));
         return map;
     }, [subjects]);
 
-    // ✅ 항상 ID 매핑 우선, 없으면 응답 subName, 그래도 없으면 (과목#ID)
     function getSubjectName(a:Assignment): string{
         const key = a.subId != null ? Number(a.subId as any) : NaN;
         return subNameById.get(key) || (a.subName?.trim()) || `(과목#${key})`;
     }
 
-    /** ===== 액션 ===== */
     async function handleCreateSem(){
         if(!newSemName.trim()) return;
         try{
             setCreatingSem(true);
             const s = await createSemester(user.userId, newSemName.trim());
             setShowSemModal(false); setNewSemName("");
-            await load(s.semId); // 생성 직후 첫 대시보드 로드
+            switchSemester(s.semId);
         }catch(e:any){ alert(e.message); }
         finally{ setCreatingSem(false); }
     }
@@ -426,10 +427,10 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
                 }
 
                 if(currentSemId === id){
-                    const next = remaining.reduce((a,b)=> a.semId > b.semId ? a : b); // 가장 최신 id
-                    await load(next.semId);
+                    const next = remaining.reduce((a,b)=> a.semId > b.semId ? a : b);
+                    switchSemester(next.semId);
                 }else{
-                    await load(currentSemId);
+                    load(currentSemId);
                 }
             }else{
                 setData(null);
@@ -454,15 +455,16 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
     async function handleDeleteSubject(id:number){
         if(!confirm("과목을 삭제할까요?")) return;
         await deleteSubject(id);
-        if(data) load(data.dashboard.semId);
+        if(data) {
+            if(filterSubId === id) setFilterSubId(null);
+            load(data.dashboard.semId);
+        }
     }
 
     function openAssignModal(sub?:Subject, edit?:Assignment){
         if (edit) {
             const raw = (edit.subId ?? sub?.subId) as any;
             const sid = (raw === 0 || raw) ? Number(raw) : undefined;
-
-            // ✅ 어떤 형식이 와도 YMD로 뽑아서 프리셋
             const ymd = shiftYMD(pickYMD(edit.dueDate) ?? "", 1) || "";
 
             setAssignForm({
@@ -480,7 +482,6 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
         }
         setShowAssignModal(true);
     }
-
 
     async function saveAssignment(){
         const f = assignForm;
@@ -509,7 +510,6 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
         if(data) load(data.dashboard.semId);
     }
 
-    // 달력 유틸
     function fmt(d:Date){
         const y=d.getFullYear(); const m=`${d.getMonth()+1}`.padStart(2,'0'); const dd=`${d.getDate()}`.padStart(2,'0');
         return `${y}-${m}-${dd}`;
@@ -524,10 +524,8 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
         return days;
     }
 
-    // ✅ 학기 바뀌면 달력 캐시 초기화
     useEffect(()=>{ setCalItems(null); }, [data?.dashboard.semId]);
 
-    // ✅ 달력 열릴 때 현재 학기 데이터 로드
     useEffect(()=>{
         if (showCalendar && data){
             getCalendar(data.dashboard.semId)
@@ -536,22 +534,19 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
         }
     }, [showCalendar, data?.dashboard.semId]);
 
-    // 달력용 집계 (서버 캘린더 API or 대시보드의 sections)
     type CalCell = { assignName:string; category:number; subName:string; isDone?:boolean };
 
     const calCellsByDate = useMemo(() => {
         const map = new Map<string, CalCell[]>();
         const list =
-            calItems /* 서버 캘린더 API 결과(items) */
+            calItems
             ?? (data ? [...data.sections.incomplete, ...data.sections.complete] : []);
 
         list.forEach((a:any) => {
             const ymd = pickYMD(a.dueDate);
             if (!ymd) return;
 
-            const plusDayOne = shiftYMD(ymd, DATE_OFFSET_DAYS_FOR_DISPLAY); // + 1일
-
-            // category가 문자열로 올 수도 있으니 숫자로 보정
+            const plusDayOne = shiftYMD(ymd, DATE_OFFSET_DAYS_FOR_DISPLAY); 
             const cat = Number(a.category ?? 0);
 
             const cell: CalCell = {
@@ -567,7 +562,6 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
         return map;
     }, [calItems, data]);
 
-    // 빈 상태
     const emptyState = (
         <div className="emptyFlexCenter">
             <div className="muted" style={{ textAlign:"center" }}>
@@ -589,6 +583,7 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
                     {user.userName}님, 안녕하세요!
                     <button className="btn logout" onClick={()=>{
                         localStorage.removeItem("2359:lastSemId");
+                        localStorage.removeItem("2359:user");
                         onLogout();
                     }}>로그아웃</button>
                 </div>
@@ -607,18 +602,20 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
 
                     <div className="semList">
                         {(data?.semesters || []).map(s=>(
-                            <div key={s.semId} className="semRow">
-                <span
-                    className={`semLink ${selectedSemId===s.semId ? "active" : ""}`}
-                    onClick={()=>load(s.semId)}
-                    role="button" tabIndex={0}
-                    onKeyDown={(e)=> (e.key==="Enter"||e.key===" ") && load(s.semId)}
-                >{s.semName}</span>
+                            <div 
+                                key={s.semId} 
+                                className={`semRow ${selectedSemId===s.semId ? "active" : ""}`}
+                                onClick={()=>switchSemester(s.semId)}
+                            >
+                                <span className="semText">{s.semName}</span>
                                 <button
-                                    className="semDelete plainX forceInk"
+                                    className="semDelete plainX"
                                     title="삭제"
                                     aria-label={`${s.semName} 삭제`}
-                                    onClick={()=>handleDeleteSem(s.semId)}
+                                    onClick={(e)=>{
+                                        e.stopPropagation(); 
+                                        handleDeleteSem(s.semId);
+                                    }}
                                 >×</button>
                             </div>
                         ))}
@@ -633,25 +630,57 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
                         emptyState
                     ) : (
                         <div className="mainInner">
-                            {/* 상단 과목 바(고정) */}
+                            {/* 상단 과목 바 */}
                             <div className="subjectsBar">
                                 <div className="h1">과목</div>
-                                <div className="toolbar wide">
-                                    <div className="chips compact">
+                                <div className="toolbar splitLayout">
+                                    <div className="subjectZone">
                                         {subjects.length===0 ? (
                                             <span className="muted">등록된 과목이 없습니다.</span>
                                         ) : (
                                             subjects.map(sub=>(
-                                                <span key={sub.subId} className="chipPill strong slim">
-                          <span className="chipText">{sub.subName}</span>
-                          <button className="x" title="과목 삭제" onClick={()=>handleDeleteSubject(Number(sub.subId))}>×</button>
-                        </span>
+                                                <div key={sub.subId} className="chipCard">
+                                                    <span className="chipText">{truncateSubject(sub.subName)}</span>
+                                                    <button className="x" title="과목 삭제" onClick={(e)=>{
+                                                        e.stopPropagation();
+                                                        handleDeleteSubject(Number(sub.subId));
+                                                    }}>×</button>
+                                                </div>
                                             ))
                                         )}
-                                        {/* 칩 흐름에 + 포함 */}
                                         <button className="chipAdd inFlow" onClick={()=>setShowSubModal(true)} title="과목 추가" aria-label="과목 추가">
                                             <img src={addSubIcon} alt="" className="icon28"/>
                                         </button>
+                                    </div>
+
+                                    {/* 컨트롤러 */}
+                                    <div className="controlZone">
+                                        <select 
+                                            className="filterSelect"
+                                            value={filterSubId ?? ""}
+                                            onChange={(e) => {
+                                                const v = e.target.value;
+                                                setFilterSubId(v ? Number(v) : null);
+                                            }}
+                                        >
+                                            <option value="">전체 과목</option>
+                                            {subjects.map(s => (
+                                                <option key={s.subId} value={s.subId}>{truncateSubject(s.subName)}</option>
+                                            ))}
+                                        </select>
+
+                                        <div className="filterGroup">
+                                            {[0, 1, 2].map(code => (
+                                                <label key={code} className="checkboxLabel">
+                                                    <input 
+                                                        type="checkbox"
+                                                        checked={filterCats.includes(code)}
+                                                        onChange={() => toggleCategory(code)}
+                                                    />
+                                                    {CATEGORY_LABEL[code]}
+                                                </label>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -671,7 +700,7 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
                                                 data.sections.complete.map(a=>{
                                                     const cat  = CATEGORY_LABEL[a.category] ?? "과제";
                                                     const sub  = getSubjectName(a);
-                                                    const hash = `# ${cat}  # ${sub}`;
+                                                    const hash = `# ${cat}  # ${truncateSubject(sub)}`;
                                                     const badge = getBadgeForFront(a.dueDate, a.isComplete, a.dueLabel);
 
                                                     return (
@@ -695,7 +724,7 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
                                         </div>
                                     </div>
 
-                                    {/* 미완료 */}
+                                    {/* 미완료 (해야할 과제) */}
                                     <div className="col rightCol">
                                         <div className="titleRow fixed">
                                             <div className="h1">해야할 과제</div>
@@ -709,11 +738,17 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
                                                 data.sections.incomplete.map(a=>{
                                                     const cat  = CATEGORY_LABEL[a.category] ?? "과제";
                                                     const sub  = getSubjectName(a);
-                                                    const hash = `# ${cat}  # ${sub}`;
+                                                    const hash = `# ${cat}  # ${truncateSubject(sub)}`;
                                                     const badge = getBadgeForFront(a.dueDate, a.isComplete, a.dueLabel);
 
+                                                    // ✅ [수정] 기한 지남 여부에 따라 클래스 분기
+                                                    // overdue가 true면 "taskCapsule overdue" (회색) 적용
+                                                    const capsuleClass = badge.overdue 
+                                                        ? "taskCapsule overdue" 
+                                                        : (badge.urgent ? "taskCapsule urgent" : "taskCapsule todo");
+
                                                     return (
-                                                        <div key={a.assignId} className={`taskCapsule ${badge.urgent ? "urgent" : "todo"}`}>
+                                                        <div key={a.assignId} className={capsuleClass}>
                                                             <div className="capsuleLeft">
                                                                 <DateBadge label={badge.label} urgent={badge.urgent}/>
                                                                 <div className="capsuleText">
@@ -749,7 +784,6 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
                         </svg>
                     </button>
 
-                    {/* 달력 뷰어 */}
                     <Modal title="캘린더" open={showCalendar} onClose={()=>setShowCalendar(false)}>
                         <div className="calendarModal">
                             <div className="calHeader">
@@ -766,14 +800,12 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
 
                         </div>
 
-                            {/* 요일 헤더: 날짜 그리드와 분리 */}
                             <div className="calHeaderRow">
                                 {["일","월","화","수","목","금","토"].map(d=>(
                                     <div key={d} className="calDow">{d}</div>
                                 ))}
                             </div>
 
-                            {/* 날짜 셀만 들어가는 그리드 */}
                             <div className="calGrid">
                                 {buildMonthGrid(calRefDate).map((d, idx)=>{
                                     const inMonth = d.getMonth()===calRefDate.getMonth();
@@ -793,7 +825,7 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
                                                             <div
                                                                 key={i}
                                                                 className={`calItem ${it.isDone ? "done" : "todo"}`}
-                                                                data-tip={`# ${CATEGORY_LABEL[it.category] ?? "과제"}  # ${it.subName || ""}`}
+                                                                data-tip={`# ${CATEGORY_LABEL[it.category] ?? "과제"}  # ${truncateSubject(it.subName || "")}`}
                                                             >
                                                                 <div className="calName">{it.assignName}</div>
                                                             </div>
@@ -810,11 +842,10 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
                 </main>
             </div>
 
-            {/* 모달: 새 학기 */}
             <Modal title="새 학기 생성" open={showSemModal} onClose={()=>setShowSemModal(false)}>
                 <div className="field">
                     <label className="label">학기 이름</label>
-                    <input className="input" placeholder="예: 2025년 1학기" value={newSemName} onChange={e=>setNewSemName(e.target.value)} disabled={creatingSem}/>
+                    <input className="input" placeholder="예: 2025년 1학기" value={newSemName} onChange={e=>setNewSemName(limitSemesterInput(e.target.value))} disabled={creatingSem}/>
                 </div>
                 <div className="modalActions">
                     <button className="btn" onClick={()=>setShowSemModal(false)} disabled={creatingSem}>취소</button>
@@ -824,11 +855,10 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
                 </div>
             </Modal>
 
-            {/* 모달: 과목 */}
             <Modal title="과목 추가" open={showSubModal} onClose={()=>setShowSubModal(false)}>
                 <div className="field">
                     <label className="label">과목 이름</label>
-                    <input className="input" value={newSubName} onChange={e=>setNewSubName(e.target.value)} placeholder="예: 운영체제"/>
+                    <input className="input" value={newSubName} onChange={e=>setNewSubName(limitSubjectInput(e.target.value))} placeholder="예: 운영체제"/>
                 </div>
                 <div className="modalActions">
                     <button className="btn" onClick={()=>setShowSubModal(false)}>취소</button>
@@ -836,7 +866,6 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
                 </div>
             </Modal>
 
-            {/* 모달: 과제 */}
             <Modal title={assignForm.assignId ? "과제 수정" : "새 과제 등록"} open={showAssignModal} onClose={()=>setShowAssignModal(false)}>
                 <div className="field">
                     <label className="label">과목 선택</label>
@@ -855,7 +884,7 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
                         selected={pickerDate}
                         onChange={(d)=>{
                             setPickerDate(d);
-                            setAssignForm(f=>({...f, dueDate: d? toYMDLocal(d): "" }));  // UTC 변환 금지, 로컬 YYYY-MM-DD
+                            setAssignForm(f=>({...f, dueDate: d? toYMDLocal(d): "" }));
                         }}
                         dateFormat="yyyy-MM-dd"
                         placeholderText="날짜를 선택하세요"
@@ -883,9 +912,27 @@ const DashboardView:React.FC<{ user:User; onLogout:()=>void }>=({ user, onLogout
     );
 };
 
-/** ===== 루트 ===== */
 export default function App(){
     const [user, setUser] = useState<User|null>(null);
-    if(!user) return <LoginView onSuccess={setUser} />;
+
+    useEffect(() => {
+        const savedUserStr = localStorage.getItem("2359:user");
+        if (savedUserStr) {
+            try {
+                const savedUser = JSON.parse(savedUserStr);
+                setUser(savedUser);
+            } catch(e) {
+                console.error("저장된 유저 정보 파싱 실패", e);
+                localStorage.removeItem("2359:user");
+            }
+        }
+    }, []);
+
+    if(!user) return (
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+            <LoginView onSuccess={setUser} />
+        </GoogleOAuthProvider>
+    );
+
     return <DashboardView user={user} onLogout={()=>setUser(null)} />;
 }

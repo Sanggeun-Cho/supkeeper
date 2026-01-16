@@ -1,11 +1,11 @@
-package com.toy.subkeeper.subject.service;
+package com.toy.subkeeper.service;
 
 import com.toy.subkeeper.DTO.SubjectDto;
 import com.toy.subkeeper.exception.DuplicateSubNameException;
-import com.toy.subkeeper.semester.domain.Semester;
-import com.toy.subkeeper.semester.repo.SemesterRepo;
-import com.toy.subkeeper.subject.domain.Subject;
-import com.toy.subkeeper.subject.repo.SubjectRepo;
+import com.toy.subkeeper.domain.Semester;
+import com.toy.subkeeper.repository.SemesterRepo;
+import com.toy.subkeeper.domain.Subject;
+import com.toy.subkeeper.repository.SubjectRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

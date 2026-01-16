@@ -1,6 +1,6 @@
-package com.toy.subkeeper.subject.repo;
+package com.toy.subkeeper.repository;
 
-import com.toy.subkeeper.subject.domain.Subject;
+import com.toy.subkeeper.domain.Subject;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

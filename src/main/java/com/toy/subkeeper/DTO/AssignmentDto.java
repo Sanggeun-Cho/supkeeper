@@ -1,7 +1,7 @@
 package com.toy.subkeeper.DTO;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.toy.subkeeper.assignment.domain.Assignment;
+import com.toy.subkeeper.domain.Assignment;
 import jakarta.validation.constraints.*;
 import lombok.*;
 

@@ -1,6 +1,6 @@
-package com.toy.subkeeper.semester.repo;
+package com.toy.subkeeper.repository;
 
-import com.toy.subkeeper.semester.domain.Semester;
+import com.toy.subkeeper.domain.Semester;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

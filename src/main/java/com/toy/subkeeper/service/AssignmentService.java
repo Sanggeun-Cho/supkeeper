@@ -1,10 +1,10 @@
-package com.toy.subkeeper.assignment.service;
+package com.toy.subkeeper.service;
 
 import com.toy.subkeeper.DTO.AssignmentDto;
-import com.toy.subkeeper.assignment.domain.Assignment;
-import com.toy.subkeeper.assignment.repo.AssignmentRepo;
-import com.toy.subkeeper.subject.domain.Subject;
-import com.toy.subkeeper.subject.repo.SubjectRepo;
+import com.toy.subkeeper.domain.Assignment;
+import com.toy.subkeeper.repository.AssignmentRepo;
+import com.toy.subkeeper.domain.Subject;
+import com.toy.subkeeper.repository.SubjectRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.expression.spel.ast.Assign;

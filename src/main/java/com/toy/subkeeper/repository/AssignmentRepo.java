@@ -1,6 +1,6 @@
-package com.toy.subkeeper.assignment.repo;
+package com.toy.subkeeper.repository;
 
-import com.toy.subkeeper.assignment.domain.Assignment;
+import com.toy.subkeeper.domain.Assignment;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -28,11 +28,13 @@ public interface AssignmentRepo extends CrudRepository<Assignment, Long> {
               JOIN a.subject sub
               JOIN sub.semester sem
              WHERE sem.id = :semId
+              and(:subId is null or sub.id = :subId)
+              and(:categories is null or a.category in :categories)
              ORDER BY a.dueDate ASC
              """)
-    List<Assignment> findAllBySemesterIdOrderByDueDateAsc(@Param("semId") Long semId);
+    List<Assignment> findAllBySemesterIdOrderByDueDateAsc(@Param("semId") Long semId, @Param("subId") Long subId, @Param("categories") List<Integer> categories);
 
-    // 학기에 해당하는 모든 과제
+    // 학기에 해당하는 모든 과제 (달력용)
     @Query("""
            select a
              from Assignment a

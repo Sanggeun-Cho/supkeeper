@@ -89,36 +89,136 @@ body{
 .icon28{ width:28px; height:28px; display:block; }
 
 .semList{ display:flex; flex-direction:column; gap:8px; margin-top:6px; }
-.semRow{ position:relative; display:flex; align-items:center; justify-content:space-between; gap:6px; padding:2px 0 6px; }
 
-.semLink{ cursor:pointer; font-weight:700; padding:2px 0; position:relative; display:inline-block; color:#111; }
-.semLink:hover{ text-decoration:underline; }
-.semLink.active{ font-weight:900; color:#1F2D6B; }
-.semLink.active::after{
-    content:""; position:absolute; left:0; right:0; bottom:-2px;
-    height:2px; background:#1F2D6B; border-radius:1px; opacity:.6;
+/* 학기 블럭 (컴팩트 카드) 스타일 */
+.semRow {
+    position:relative;
+    display:flex; align-items:center; justify-content:space-between; gap:6px;
+    padding:8px 10px;
+    border-radius: 8px;
+    background: #fff;
+    border: 1px solid #dfe3ee;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.semRow:hover {
+    background: #fcfdfe;
+    border-color: #cbd5e1;
+}
+.semRow.active {
+    border-color: var(--blue);
+    background: #fff;
+    box-shadow: 0 0 0 1px var(--blue);
 }
 
-.semDelete.plainX{ border:none; background:transparent; cursor:pointer; font-weight:900; font-size:18px; line-height:1; opacity:.85; }
+.semText {
+    font-size: 14px;
+    font-weight: 700;
+    color: #495160;
+}
+.semRow.active .semText {
+    color: var(--blue);
+    font-weight: 800;
+}
+
+.semDelete.plainX{ border:none; background:transparent; cursor:pointer; font-weight:900; font-size:18px; line-height:1; opacity:.5; }
+.semDelete.plainX:hover { opacity: 1; color: #d32f2f; }
 .forceInk{ color:#111 !important; }
 
-/* 과목 칩 */
-.toolbar.wide{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
-.chips{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-/* ✅ 삭제 버튼과 이름 간격 늘림 */
-.chips.compact{ gap:10px; }                      /* 6px → 10px */
-.chipPill{
-    display:inline-flex; align-items:center; gap:12px;  /* 8px → 12px */
-    padding:5px 14px;                                   /* 5x12 → 5x14 */
-    border-radius:999px; background:var(--chip-bg); border:1px solid var(--chip-border);
+/* 과목 바 레이아웃 */
+.toolbar.splitLayout {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
 }
-.chipPill.slim{ padding:2px 10px; }
-.chipPill.strong{ background:var(--chip-bg); border-color:var(--chip-border); }
-.chipText{ font-weight:800; margin-left:4px; line-height:1; }
-.chipPill .x{ cursor:pointer; border:none; background:transparent; color:#495160; font-weight:900; line-height:1; margin-left:8px; }
-.chipPill .x:hover{ color:#111; }
-.chipAdd{ border:none; background:transparent; padding:0; margin-left:2px; cursor:pointer; }
-.chipAdd.inFlow{ display:inline-flex; align-items:center; margin-left:4px; }
+.subjectZone {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    flex: 1 1 auto;
+}
+.controlZone {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 0 0 auto;
+    padding-top: 2px;
+}
+
+/* 과목 미니 카드 */
+.chipCard {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: #fff;
+    border: 1px solid #E2E4EA;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    font-size: 14px;
+    color: var(--ink);
+}
+.chipText {
+    font-weight: 700;
+}
+.chipCard .x {
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: #9aa1b0;
+    font-weight: 900;
+    line-height: 1;
+    font-size: 16px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+.chipCard .x:hover { color: #d32f2f; }
+
+/* 과목 추가 버튼 */
+.chipAdd {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.chipAdd.inFlow { margin-left: 2px; }
+.chipAdd:focus { outline: none; }
+
+/* 컨트롤 요소 */
+.filterSelect {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 700;
+    height: 34px;
+    cursor: pointer;
+}
+.filterSelect:focus { outline: 2px solid var(--blue); border-color: transparent; }
+
+.filterGroup {
+    display:flex; align-items:center; gap:12px;
+    background:#fff; padding:0 12px;
+    height: 34px;
+    border-radius:8px; border:1px solid #d1d5db;
+}
+.checkboxLabel {
+    display:flex; align-items:center; gap:4px;
+    font-size:13px; font-weight:700; cursor:pointer; user-select:none;
+}
+.checkboxLabel input { cursor:pointer; accent-color:var(--blue); width:16px; height:16px; }
+
 
 /* ===== 칼럼 & 내부 스크롤 ===== */
 .cols{ display:grid; grid-template-columns:0.95fr 1.05fr; gap:24px; height:100%; }
@@ -127,48 +227,53 @@ body{
 .listScroll{ flex:1 1 auto; min-height:0; overflow:auto; padding-right:6px; }
 .listScroll .taskCapsule + .taskCapsule{ margin-top:12px; }
 
-/* 우측 구분선 */
 .rightCol{ position:relative; padding-left:16px; }
 .rightCol::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:2px; background:#1f2937; border-radius:2px; opacity:.9; }
 
-/* ===== 캡슐형 과제 블럭 ===== */
+/* ===== 캡슐형 과제 블럭 (컴팩트 버전) ===== */
 .taskBadge{
-    width:72px; height:72px; border-radius:50%;
+    width:46px; height:46px; border-radius:50%;
     background:#6A92F2; color:#fff; font-weight:900;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    flex:0 0 72px; box-shadow:0 2px 0 rgba(0,0,0,.08) inset;
+    flex:0 0 46px; box-shadow:0 2px 0 rgba(0,0,0,.08) inset;
 }
-.taskBadge .badgeMain{ font-size:16px; line-height:1.1; }
-.taskBadge .badgeSub{ font-size:13px; }
+.taskBadge .badgeMain{ font-size:13px; line-height:1.1; }
+.taskBadge .badgeSub{ font-size:10px; }
 .taskBadge.urgent{ background:#355DC0; }
-/* ✅ D-1/D-DAY/OVER 확대 */
-.taskBadge.isD{ width:72px; height:72px; }
-.taskBadge.isD .badgeMain{ font-size:18px; }
-.taskBadge.isD .badgeSub{ font-size:14px; }
+
+.taskBadge.isD{ width:46px; height:46px; }
+.taskBadge.isD .badgeMain{ font-size:14px; }
+.taskBadge.isD .badgeSub{ font-size:10px; }
 
 .taskCapsule{
-    display:flex; align-items:center; justify-content:space-between; gap:18px;
-    padding:18px 22px; border-radius:32px; border:2px solid var(--capsule-border);
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    padding:12px 16px;
+    border-radius:24px;
+    border:2px solid var(--capsule-border);
     background:#fff; box-shadow:0 2px 0 rgba(0,0,0,.12) inset;
 }
 .taskCapsule.todo{ background:#fff; }
 .taskCapsule.urgent{ background:var(--capsule-urgent); border-color:var(--capsule-urgent); }
+/* 완료된 과제 스타일 */
 .taskCapsule.done{ background:var(--capsule-done); border-color:var(--capsule-done); }
+/* ✅ [추가] 기한 지남(Overdue) 스타일 (완료됨과 동일하게 회색 처리) */
+.taskCapsule.overdue{ background:var(--capsule-done); border-color:var(--capsule-done); }
 
-.capsuleLeft{ display:flex; align-items:center; gap:18px; }
-.capsuleText .hashLine{ font-size:13px; opacity:.6; margin-bottom:2px; }
-.taskTitle{ font-size:24px; font-weight:900; letter-spacing:-.2px; }
+.capsuleLeft{ display:flex; align-items:center; gap:14px; }
+.capsuleText .hashLine{ font-size:12px; opacity:.6; margin-bottom:1px; }
+.taskTitle{ font-size:18px; font-weight:800; letter-spacing:-.2px; }
 
-/* 정사각 버튼 */
-.capsuleActions{ display:flex; align-items:center; gap:8px; }
+/* 정사각 버튼 (약간 작게) */
+.capsuleActions{ display:flex; align-items:center; gap:6px; }
 .sqBtn{
-    width:32px; height:32px; border-radius:10px;
+    width:28px; height:28px; border-radius:8px;
     display:inline-flex; align-items:center; justify-content:center;
     border:1px solid rgba(0,0,0,.12); background:#fff; cursor:pointer; font-weight:900;
 }
+.sqBtn img { width:14px; height:14px; }
 .sqBtn.red{   background:var(--btn-red); border-color:var(--btn-red); }
 .sqBtn.blue{  background:var(--btn-blue); border-color:var(--btn-blue); }
-.sqBtn.green{ background:var(--btn-green); border-color:var(--btn-green); color:#0b3; }
+.sqBtn.green{ background:var(--btn-green); border-color:var(--btn-green); color:#0b3; font-size:14px; }
 
 /* ===== 모달 ===== */
 .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:20; }
@@ -229,8 +334,8 @@ body{
     border-radius:8px;
     border:1px solid #cfd5de;
     background:#fff;
-    color:#111;          /* 기호 색상을 확실히 */
-    font-size:18px;      /* 기호 크게 */
+    color:#111;
+    font-size:18px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -249,15 +354,14 @@ body{
   outline:2px solid #2d5cff; outline-offset:2px;
 }
 
-/* ✅ 달력 전체 한 화면에 – 그리드 행 높이 고정 & 셀 내부 스크롤 */
+/* 달력 전체 한 화면에 – 그리드 행 높이 고정 & 셀 내부 스크롤 */
 .calGrid{
     display:grid; grid-template-columns:repeat(7, 1fr);
     gap:5px;
     flex:1 1 auto; min-height:0;
-    grid-auto-rows:88px; /* 6행이 화면에 모두 보이도록 */
+    grid-auto-rows:88px;
     overflow:visible;
 }
-/* 달력 모달 너비 확대 & 높이 제한 */
 .modal:has(.calendarModal){ width:1200px; max-width:96vw; }
 .calendarModal{
     display:flex; flex-direction:column;
@@ -266,26 +370,25 @@ body{
 .calHeader {
     display:flex;
     align-items:center;
-    justify-content:space-between; /* 좌우 끝에 버튼, 가운데 타이틀 */
+    justify-content:space-between;
     margin-bottom:8px;
 }
 .calTitle {
      font-weight:900;
      font-size:16px;
      text-align:center;
-     flex:1;              /* 버튼이 눌려도 가운데 고정 */
+     flex:1;
  }
-/* 요일 헤더 전용 행 (그리드 분리) */
 .calHeaderRow{
     display:grid;
     grid-template-columns:repeat(7, 1fr);
-    margin: 2px 0 6px;          /* 요일과 날짜칸 사이 최소 간격 */
+    margin: 2px 0 6px;
 }
 .calHeaderRow .calDow{
     text-align:center;
     font-weight:800;
     opacity:.75;
-    padding: 2px 0;             /* 너무 넓지 않게 */
+    padding: 2px 0;
 }
 .calDow{ text-align:center; font-weight:800; opacity:.7;}
 .calDay{
@@ -302,7 +405,6 @@ body{
     overflow: hidden;
     text-overflow: ellipsis;
 }
-/* 캘린더 말풍선 툴팁 */
 .calItem{ border:1px solid #e7eaf3; border-radius:8px; padding:6px; background:#f9fbff; display:flex; flex-direction:column; }
 .calItem[data-tip]:hover::after{
     content: attr(data-tip);
@@ -328,7 +430,7 @@ body{
     bottom: 100%;
     transform: translateY(0px);
     border: 6px solid transparent;
-    border-top-color: rgba(17,17,17,.92); /* 말풍선 꼬리 */
+    border-top-color: rgba(17,17,17,.92);
 }
 .calItem.todo{ background:#f9fbff; border-color:#dfe7ff; }
 .calItem.urgent{ background:#fff4e9; border-color:#ffd7bd; }

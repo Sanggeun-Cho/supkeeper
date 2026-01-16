@@ -11,6 +11,8 @@
     "build:copy": "vite build && rm -rf ../src/main/resources/static/* && cp -R dist/* ../src/main/resources/static/"
   },
   "dependencies": {
+    "@react-oauth/google": "^0.13.4",
+    "jwt-decode": "^4.0.0",
     "react": "^19.1.1",
     "react-datepicker": "^8.7.0",
     "react-dom": "^19.1.1"

@@ -1,6 +1,6 @@
 package com.toy.subkeeper.scheduler;
 
-import com.toy.subkeeper.assignment.service.AssignmentService;
+import com.toy.subkeeper.service.AssignmentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
