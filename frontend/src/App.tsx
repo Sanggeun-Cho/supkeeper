@@ -36,7 +36,7 @@ interface Dashboard {
 }
 
 /** ===== 상수/유틸 ===== */
-const API_BASE = "";
+const API_BASE = "/api";
 
 const CATEGORY_LABEL: Record<number, "과제" | "강의" | "할 일"> = {
     0: "과제",
